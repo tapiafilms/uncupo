@@ -1,0 +1,1 @@
+import { useEffect,useState } from "react";import { supabase } from "../../infra/supabaseClient";export default function Dashboard(){const[trips,setTrips]=useState([]);useEffect(()=>{supabase.from("trips").select("*").then(res=>{setTrips(res.data||[]);});},[]);return(<div><h1>Trips</h1>{trips.map((t:any)=><div key={t.id}>{t.name}</div>)}</div>);}

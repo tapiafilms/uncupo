@@ -82,7 +82,7 @@ export function AlertaForm({ userId }: { userId: string }) {
           Nueva alerta de viaje
         </button>
       ) : (
-        <form onSubmit={handleSubmit} className="card p-4 space-y-4 animate-slide-up">
+        <form onSubmit={handleSubmit} className="card p-4 space-y-4 animate-slide-up overflow-hidden">
           <div className="flex items-center justify-between mb-1">
             <p className="font-semibold text-ink-primary">Nueva alerta</p>
             <button type="button" onClick={() => setOpen(false)} className="text-ink-muted text-xl leading-none">×</button>
@@ -116,24 +116,24 @@ export function AlertaForm({ userId }: { userId: string }) {
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <div>
+            <div className="min-w-0">
               <label className="text-xs text-ink-muted mb-1 block">Desde fecha</label>
-              <input type="date" value={fechaMin} onChange={e => setFechaMin(e.target.value)} className="input text-sm" />
+              <input type="date" value={fechaMin} onChange={e => setFechaMin(e.target.value)} className="input text-sm w-full min-w-0" />
             </div>
-            <div>
+            <div className="min-w-0">
               <label className="text-xs text-ink-muted mb-1 block">Hasta fecha</label>
-              <input type="date" value={fechaMax} onChange={e => setFechaMax(e.target.value)} className="input text-sm" />
+              <input type="date" value={fechaMax} onChange={e => setFechaMax(e.target.value)} className="input text-sm w-full min-w-0" />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <div>
+            <div className="min-w-0">
               <label className="text-xs text-ink-muted mb-1 block">Hora desde</label>
-              <input type="time" value={horaMin} onChange={e => setHoraMin(e.target.value)} className="input text-sm" />
+              <input type="time" value={horaMin} onChange={e => setHoraMin(e.target.value)} className="input text-sm w-full min-w-0" />
             </div>
-            <div>
+            <div className="min-w-0">
               <label className="text-xs text-ink-muted mb-1 block">Hora hasta</label>
-              <input type="time" value={horaMax} onChange={e => setHoraMax(e.target.value)} className="input text-sm" />
+              <input type="time" value={horaMax} onChange={e => setHoraMax(e.target.value)} className="input text-sm w-full min-w-0" />
             </div>
           </div>
 

@@ -1,0 +1,109 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  html {
+    @apply bg-surface-base text-ink-primary;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    @apply font-sans bg-surface-base text-ink-primary min-h-screen;
+    /* Safe area for notch/home indicator */
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  * {
+    @apply border-surface-border;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 4px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-surface-base;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-surface-subtle rounded-full;
+  }
+}
+
+@layer components {
+  /* Card base */
+  .card {
+    @apply bg-surface-raised rounded-2xl border border-surface-border shadow-card;
+  }
+
+  /* Input base */
+  .input {
+    @apply w-full bg-surface-overlay border border-surface-border rounded-xl px-4 py-3
+           text-ink-primary placeholder-ink-muted
+           focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent
+           transition-all duration-200;
+  }
+
+  /* Button variants */
+  .btn-primary {
+    @apply bg-brand hover:bg-brand-dark active:scale-95
+           text-white font-semibold rounded-xl px-6 py-3
+           transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply bg-surface-overlay hover:bg-surface-subtle active:scale-95
+           text-ink-primary font-medium rounded-xl px-6 py-3
+           border border-surface-border
+           transition-all duration-150;
+  }
+
+  .btn-ghost {
+    @apply bg-transparent hover:bg-surface-overlay active:scale-95
+           text-ink-secondary font-medium rounded-xl px-4 py-2
+           transition-all duration-150;
+  }
+
+  /* Badge */
+  .badge {
+    @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  /* Bottom nav safe area */
+  .bottom-nav {
+    @apply fixed bottom-0 left-0 right-0 z-50
+           bg-surface-raised border-t border-surface-border
+           flex items-center justify-around
+           px-2;
+    padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+  }
+
+  /* Page container — accounts for top status bar + bottom nav */
+  .page-container {
+    @apply max-w-md mx-auto px-4 pb-24 pt-4;
+    min-height: 100dvh;
+  }
+}
+
+@layer utilities {
+  /* Status colors */
+  .status-publicado   { @apply text-info bg-info/10; }
+  .status-confirmado  { @apply text-success bg-success/10; }
+  .status-en_camino   { @apply text-warning bg-warning/10; }
+  .status-en_destino  { @apply text-brand bg-brand/10; }
+  .status-finalizado  { @apply text-ink-muted bg-surface-overlay; }
+  .status-cancelado   { @apply text-danger bg-danger/10; }
+
+  /* Gradient text */
+  .gradient-text {
+    @apply bg-gradient-to-r from-brand to-brand-light bg-clip-text text-transparent;
+  }
+}

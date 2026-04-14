@@ -1,0 +1,22 @@
+{
+  "name": "UnCupo",
+  "short_name": "UnCupo",
+  "description": "Comparte viaje entre Viña del Mar y Santiago",
+  "start_url": "/home",
+  "display": "standalone",
+  "background_color": "#0A0A0F",
+  "theme_color": "#0A0A0F",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

@@ -1,16 +1,31 @@
-export default function PublicarPage() {
+import { createClient } from '@/lib/supabase/server'
+import { redirect } from 'next/navigation'
+import { PublishForm } from './PublishForm'
+
+export default async function PublicarPage() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
+
+  // Fetch user's vehicles
+  const { data: vehiculos } = await supabase
+    .from('vehiculos')
+    .select('*')
+    .eq('user_id', user.id)
+
   return (
     <div className="page-container">
-      <h1 className="text-2xl font-bold text-ink-primary mb-2 pt-2">Publicar Viaje</h1>
-      <p className="text-ink-secondary text-sm mb-6">Completa los datos de tu viaje</p>
-
-      <div className="card p-6 text-center py-16">
-        <span className="text-4xl mb-3 block">🚧</span>
-        <p className="text-ink-secondary font-medium">Próximamente — Fase 2</p>
-        <p className="text-ink-muted text-sm mt-1">
-          Formulario de publicación con IA
+      <div className="pt-2 mb-6">
+        <h1 className="text-2xl font-bold text-ink-primary">Publicar Viaje</h1>
+        <p className="text-sm text-ink-secondary mt-1">
+          Completa los datos — otros verán tu viaje al instante
         </p>
       </div>
+
+      <PublishForm
+        userId={user.id}
+        vehiculos={vehiculos ?? []}
+      />
     </div>
   )
 }

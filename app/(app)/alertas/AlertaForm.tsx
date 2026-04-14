@@ -115,25 +115,27 @@ export function AlertaForm({ userId }: { userId: string }) {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div className="min-w-0">
-              <label className="text-xs text-ink-muted mb-1 block">Desde fecha</label>
-              <input type="date" value={fechaMin} onChange={e => setFechaMin(e.target.value)} className="input text-sm w-full min-w-0" />
+          <div className="space-y-2">
+            <label className="text-xs text-ink-muted block">Rango de fechas</label>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-ink-muted w-10 shrink-0">Desde</span>
+              <input type="date" value={fechaMin} onChange={e => setFechaMin(e.target.value)} className="input text-sm flex-1" style={{ maxWidth: '100%' }} />
             </div>
-            <div className="min-w-0">
-              <label className="text-xs text-ink-muted mb-1 block">Hasta fecha</label>
-              <input type="date" value={fechaMax} onChange={e => setFechaMax(e.target.value)} className="input text-sm w-full min-w-0" />
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-ink-muted w-10 shrink-0">Hasta</span>
+              <input type="date" value={fechaMax} onChange={e => setFechaMax(e.target.value)} className="input text-sm flex-1" style={{ maxWidth: '100%' }} />
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div className="min-w-0">
-              <label className="text-xs text-ink-muted mb-1 block">Hora desde</label>
-              <input type="time" value={horaMin} onChange={e => setHoraMin(e.target.value)} className="input text-sm w-full min-w-0" />
+          <div className="space-y-2">
+            <label className="text-xs text-ink-muted block">Rango de horario</label>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-ink-muted w-10 shrink-0">Desde</span>
+              <input type="time" value={horaMin} onChange={e => setHoraMin(e.target.value)} className="input text-sm flex-1" style={{ maxWidth: '100%' }} />
             </div>
-            <div className="min-w-0">
-              <label className="text-xs text-ink-muted mb-1 block">Hora hasta</label>
-              <input type="time" value={horaMax} onChange={e => setHoraMax(e.target.value)} className="input text-sm w-full min-w-0" />
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-ink-muted w-10 shrink-0">Hasta</span>
+              <input type="time" value={horaMax} onChange={e => setHoraMax(e.target.value)} className="input text-sm flex-1" style={{ maxWidth: '100%' }} />
             </div>
           </div>
 

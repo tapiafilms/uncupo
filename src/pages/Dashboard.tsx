@@ -1,92 +1,9 @@
-import React, { useEffect, useState } from "react";
-import { supabase } from "../lib/supabase";
-
-type Trip = {
-  id: string;
-  name: string;
-  user_id: string;
-  created_at: string;
-};
+import React, { useState } from "react";
+import { useTrips } from "../features/trips/hooks/useTrips";
 
 export default function Dashboard() {
-  const [trips, setTrips] = useState<Trip[]>([]);
-  const [loading, setLoading] = useState(false);
+  const { trips, loading, createTrip, deleteTrip } = useTrips();
   const [tripName, setTripName] = useState("");
-
-  const getTrips = async () => {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) return;
-
-    const { data, error } = await supabase
-      .from("trips")
-      .select("*")
-      .eq("user_id", user.id);
-
-    if (error) {
-      console.error(error);
-      return;
-    }
-
-    setTrips(data || []);
-  };
-
-  const createTrip = async () => {
-    if (!tripName.trim()) {
-      alert("Escribe un nombre ❌");
-      return;
-    }
-
-    setLoading(true);
-
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      alert("Debes iniciar sesión ❌");
-      setLoading(false);
-      return;
-    }
-
-    const { data, error } = await supabase
-      .from("trips")
-      .insert([
-        {
-          name: tripName,
-          user_id: user.id,
-        },
-      ])
-      .select();
-
-    if (error) {
-      console.error(error);
-      alert("Error ❌");
-    } else if (data) {
-      setTrips((prev) => [...prev, data[0]]);
-      setTripName("");
-    }
-
-    setLoading(false);
-  };
-
-  const deleteTrip = async (id: string) => {
-    const { error } = await supabase.from("trips").delete().eq("id", id);
-
-    if (error) {
-      console.error(error);
-      alert("Error eliminando ❌");
-      return;
-    }
-
-    setTrips((prev) => prev.filter((trip) => trip.id !== id));
-  };
-
-  useEffect(() => {
-    getTrips();
-  }, []);
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
@@ -101,7 +18,7 @@ export default function Dashboard() {
         />
 
         <button
-          onClick={createTrip}
+          onClick={() => createTrip(tripName)}
           disabled={loading}
           className="bg-black text-white px-4 py-2 rounded-lg hover:opacity-80 transition"
         >
@@ -115,7 +32,7 @@ export default function Dashboard() {
             <p className="text-gray-500">No hay viajes aún</p>
           )}
 
-          {trips.map((trip) => (
+          {trips.map((trip: any) => (
             <div
               key={trip.id}
               className="flex justify-between items-center bg-gray-50 p-3 rounded-lg"

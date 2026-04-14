@@ -14,6 +14,9 @@ export default function LoginPage() {
         <p className="text-ink-secondary mt-2 text-sm">
           Viña del Mar ↔ Santiago
         </p>
+        <p className="text-ink-muted mt-1 text-xs">
+          Ingresa con tu email — sin contraseña
+        </p>
       </div>
 
       <LoginForm />

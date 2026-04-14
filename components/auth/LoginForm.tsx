@@ -1,178 +1,110 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { cn } from '@/lib/utils'
+import { Mail, ArrowRight, CheckCircle } from 'lucide-react'
 
-type Step = 'phone' | 'otp'
+type Step = 'email' | 'sent'
 
 export function LoginForm() {
-  const router = useRouter()
-  const [step, setStep] = useState<Step>('phone')
-  const [phone, setPhone] = useState('')
-  const [otp, setOtp] = useState('')
+  const supabase = createClient()
+  const [step, setStep] = useState<Step>('email')
+  const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const supabase = createClient()
-
-  // Format phone: ensure +56 9 XXXX XXXX
-  function normalizePhone(raw: string): string {
-    const digits = raw.replace(/\D/g, '')
-    if (digits.startsWith('569')) return `+${digits}`
-    if (digits.startsWith('9') && digits.length === 9) return `+56${digits}`
-    if (digits.startsWith('56')) return `+${digits}`
-    return `+56${digits}`
-  }
-
-  async function handleSendOtp(e: React.FormEvent) {
+  async function handleSendLink(e: React.FormEvent) {
     e.preventDefault()
     setError(null)
     setLoading(true)
 
-    const normalized = normalizePhone(phone)
-
     const { error } = await supabase.auth.signInWithOtp({
-      phone: normalized,
+      email: email.trim().toLowerCase(),
+      options: {
+        emailRedirectTo: `${window.location.origin}/api/auth/callback`,
+      },
     })
 
     setLoading(false)
 
     if (error) {
-      setError('No pudimos enviar el código. Verifica el número.')
+      setError('No pudimos enviar el link. Verifica tu email.')
       return
     }
 
-    setStep('otp')
+    setStep('sent')
   }
 
-  async function handleVerifyOtp(e: React.FormEvent) {
-    e.preventDefault()
-    setError(null)
-    setLoading(true)
+  if (step === 'sent') {
+    return (
+      <div className="w-full max-w-sm text-center animate-slide-up">
+        <div className="w-16 h-16 rounded-full bg-success/20 flex items-center justify-center mx-auto mb-4">
+          <CheckCircle size={32} className="text-success" />
+        </div>
+        <h2 className="text-lg font-bold text-ink-primary">Revisa tu email</h2>
+        <p className="text-ink-secondary text-sm mt-2">
+          Enviamos un link a{' '}
+          <span className="text-ink-primary font-semibold">{email}</span>
+        </p>
+        <p className="text-ink-muted text-xs mt-2">
+          Haz clic en el link del email para ingresar.<br />
+          Puede tardar hasta 1 minuto.
+        </p>
 
-    const normalized = normalizePhone(phone)
-
-    const { data, error } = await supabase.auth.verifyOtp({
-      phone: normalized,
-      token: otp,
-      type: 'sms',
-    })
-
-    if (error) {
-      setLoading(false)
-      setError('Código incorrecto o expirado.')
-      return
-    }
-
-    // Create user profile if first time
-    if (data.user) {
-      const { data: existing } = await supabase
-        .from('users')
-        .select('id')
-        .eq('id', data.user.id)
-        .single()
-
-      if (!existing) {
-        await supabase.from('users').insert({
-          id: data.user.id,
-          nombre: '',
-          telefono: normalized,
-        })
-      }
-    }
-
-    router.replace('/home')
+        <button
+          onClick={() => { setStep('email'); setError(null) }}
+          className="btn-ghost w-full mt-6 text-sm"
+        >
+          Usar otro email
+        </button>
+      </div>
+    )
   }
 
   return (
-    <div className="w-full max-w-sm">
-      {step === 'phone' ? (
-        <form onSubmit={handleSendOtp} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-ink-secondary mb-2">
-              Número de teléfono
-            </label>
-            <div className="flex gap-2">
-              <span className="flex items-center px-3 bg-surface-overlay border border-surface-border rounded-xl text-ink-secondary text-sm font-medium">
-                🇨🇱 +56
-              </span>
-              <input
-                type="tel"
-                inputMode="numeric"
-                placeholder="9 1234 5678"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                className="input flex-1"
-                autoFocus
-                required
-              />
-            </div>
-          </div>
+    <form onSubmit={handleSendLink} className="w-full max-w-sm space-y-4">
+      <div>
+        <label className="block text-sm font-medium text-ink-secondary mb-2">
+          Tu email
+        </label>
+        <div className="relative">
+          <Mail
+            size={16}
+            className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-muted"
+          />
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="tu@email.com"
+            className="input pl-10"
+            autoFocus
+            autoComplete="email"
+            required
+          />
+        </div>
+      </div>
 
-          {error && (
-            <p className="text-danger text-sm animate-fade-in">{error}</p>
-          )}
-
-          <button
-            type="submit"
-            disabled={loading || phone.length < 8}
-            className="btn-primary w-full"
-          >
-            {loading ? 'Enviando…' : 'Continuar'}
-          </button>
-        </form>
-      ) : (
-        <form onSubmit={handleVerifyOtp} className="space-y-4">
-          <div className="text-center mb-2">
-            <p className="text-ink-secondary text-sm">
-              Código enviado a{' '}
-              <span className="text-ink-primary font-medium">
-                +56 {phone}
-              </span>
-            </p>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-ink-secondary mb-2">
-              Código SMS
-            </label>
-            <input
-              type="text"
-              inputMode="numeric"
-              pattern="[0-9]*"
-              maxLength={6}
-              placeholder="123456"
-              value={otp}
-              onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
-              className={cn('input text-center text-2xl tracking-[0.5em] font-bold')}
-              autoFocus
-              required
-            />
-          </div>
-
-          {error && (
-            <p className="text-danger text-sm animate-fade-in">{error}</p>
-          )}
-
-          <button
-            type="submit"
-            disabled={loading || otp.length < 6}
-            className="btn-primary w-full"
-          >
-            {loading ? 'Verificando…' : 'Ingresar'}
-          </button>
-
-          <button
-            type="button"
-            onClick={() => { setStep('phone'); setOtp(''); setError(null) }}
-            className="btn-ghost w-full text-sm"
-          >
-            Cambiar número
-          </button>
-        </form>
+      {error && (
+        <p className="text-danger text-sm animate-fade-in">{error}</p>
       )}
-    </div>
+
+      <button
+        type="submit"
+        disabled={loading || !email.includes('@')}
+        className="btn-primary w-full flex items-center justify-center gap-2"
+      >
+        {loading ? 'Enviando…' : (
+          <>
+            Continuar
+            <ArrowRight size={16} />
+          </>
+        )}
+      </button>
+
+      <p className="text-xs text-ink-muted text-center">
+        Te enviaremos un link mágico — sin contraseña
+      </p>
+    </form>
   )
 }

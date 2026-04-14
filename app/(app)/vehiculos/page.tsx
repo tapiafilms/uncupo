@@ -14,7 +14,7 @@ export default async function VehiculosPage() {
     .from('vehiculos')
     .select('*')
     .eq('user_id', user.id)
-    .order('creado_en', { ascending: false })
+    .order('patente', { ascending: true })
 
   return (
     <VehiculosClient

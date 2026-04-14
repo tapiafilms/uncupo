@@ -134,8 +134,8 @@ export default async function ViajeDetailPage({ params, searchParams }: PageProp
       </div>
 
       {/* Driver card */}
-      <div className="card p-4 mb-4">
-        <p className="text-xs font-semibold text-ink-muted uppercase tracking-wider mb-3">Chofer</p>
+      <a href={`/usuario/${trip.chofer_id}`} className="card block p-4 mb-4 hover:border-brand/40 transition-colors">
+        <p className="text-xs font-semibold text-ink-muted uppercase tracking-wider mb-3">Chofer →</p>
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 rounded-full bg-brand/20 flex items-center justify-center text-xl font-bold text-brand">
             {trip.chofer?.nombre?.[0]?.toUpperCase() ?? '?'}
@@ -158,7 +158,7 @@ export default async function ViajeDetailPage({ params, searchParams }: PageProp
             </div>
           </div>
         </div>
-      </div>
+      </a>
 
       {/* Seats bar */}
       <div className="card p-4 mb-4">
@@ -196,6 +196,18 @@ export default async function ViajeDetailPage({ params, searchParams }: PageProp
             reservaId={miReserva?.id}
             estadoPasajero={miReserva?.estado_pasajero}
           />
+        </div>
+      )}
+
+      {/* Rating CTA — viaje finalizado */}
+      {trip.estado === 'finalizado' && (
+        <div className="card p-4 mb-4 text-center border-brand/30">
+          <p className="text-2xl mb-2">⭐</p>
+          <p className="font-semibold text-ink-primary text-sm">¿Cómo estuvo el viaje?</p>
+          <p className="text-xs text-ink-muted mt-1 mb-3">Tus calificaciones ayudan a la comunidad</p>
+          <a href={`/calificar/${trip.id}`} className="btn-primary w-full text-sm py-3 block">
+            Calificar viaje
+          </a>
         </div>
       )}
     </div>

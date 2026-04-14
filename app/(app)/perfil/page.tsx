@@ -1,8 +1,13 @@
+export const dynamic = 'force-dynamic'
+
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { LogoutButton } from '@/components/auth/LogoutButton'
-import { Star, Car, User } from 'lucide-react'
+import { Star, Car, Edit2 } from 'lucide-react'
+import Link from 'next/link'
 import type { DbUser } from '@/lib/types'
+import { calcularBadges } from '@/lib/badges'
+import { ProfileEditWrapper } from './ProfileEditWrapper'
 
 export default async function PerfilPage() {
   const supabase = await createClient()
@@ -17,66 +22,165 @@ export default async function PerfilPage() {
 
   const p = profile as DbUser | null
 
+  // Recent ratings
+  const { data: calificaciones } = await supabase
+    .from('calificaciones')
+    .select('*, de_user:users!calificaciones_de_user_id_fkey(nombre)')
+    .eq('a_user_id', user.id)
+    .order('creado_en', { ascending: false })
+    .limit(5)
+
+  // Trips as driver count
+  const { count: viajesChofer } = await supabase
+    .from('viajes')
+    .select('*', { count: 'exact', head: true })
+    .eq('chofer_id', user.id)
+    .eq('estado', 'finalizado')
+
+  // Pending ratings to give
+  const { data: pendingRating } = await supabase
+    .from('viajes')
+    .select('id, origen, destino')
+    .eq('estado', 'finalizado')
+    .or(`chofer_id.eq.${user.id}`)
+    .order('creado_en', { ascending: false })
+    .limit(5)
+
+  const badges = calcularBadges({
+    total_viajes: p?.total_viajes ?? 0,
+    calificacion_promedio: Number(p?.calificacion_promedio ?? 0),
+    nivel_confianza: p?.nivel_confianza ?? 1,
+  })
+
+  const reviews = (calificaciones ?? []) as any[]
+
   return (
     <div className="page-container">
-      <div className="flex items-center justify-between mb-6 pt-2">
+      {/* Header */}
+      <div className="flex items-center justify-between pt-2 mb-5">
         <h1 className="text-2xl font-bold text-ink-primary">Perfil</h1>
         <LogoutButton />
       </div>
 
-      {/* Avatar + name */}
-      <div className="card p-6 flex items-center gap-4 mb-4">
-        <div className="w-16 h-16 rounded-full bg-brand/20 flex items-center justify-center text-2xl shrink-0">
-          {p?.nombre?.[0]?.toUpperCase() ?? <User size={28} className="text-brand" />}
+      {/* Avatar + name + edit */}
+      <div className="card p-5 mb-4">
+        <div className="flex items-start gap-4">
+          <div className="w-16 h-16 rounded-full bg-brand/20 flex items-center justify-center text-2xl font-bold text-brand shrink-0">
+            {p?.nombre?.[0]?.toUpperCase() ?? '?'}
+          </div>
+          <div className="flex-1 min-w-0">
+            <ProfileEditWrapper userId={user.id} nombre={p?.nombre ?? ''} />
+            <p className="text-sm text-ink-secondary mt-1">{p?.telefono ?? user.phone}</p>
+            {p && Number(p.calificacion_promedio) > 0 && (
+              <div className="flex items-center gap-1 mt-1">
+                <Star size={13} className="text-warning fill-warning" />
+                <span className="text-sm font-semibold text-ink-primary">
+                  {Number(p.calificacion_promedio).toFixed(2)}
+                </span>
+                <span className="text-xs text-ink-muted">({reviews.length} reseñas)</span>
+              </div>
+            )}
+          </div>
         </div>
-        <div className="flex-1 min-w-0">
-          <p className="font-semibold text-ink-primary text-lg truncate">
-            {p?.nombre || 'Sin nombre'}
-          </p>
-          <p className="text-sm text-ink-secondary">{p?.telefono ?? user.phone}</p>
-          {p != null && p.calificacion_promedio > 0 && (
-            <div className="flex items-center gap-1 mt-1">
-              <Star size={12} className="text-warning fill-warning" />
-              <span className="text-xs text-ink-secondary">
-                {p.calificacion_promedio.toFixed(1)} · {p.total_viajes} viajes
+
+        {/* Badges */}
+        {badges.length > 0 && (
+          <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-surface-border">
+            {badges.map(b => (
+              <span key={b.id} className={`badge border text-xs font-semibold ${b.color}`} title={b.desc}>
+                {b.emoji} {b.label}
               </span>
-            </div>
-          )}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-3 mb-4">
-        {[
-          { label: 'Viajes', value: p?.total_viajes ?? 0, icon: Car },
-          { label: 'Calificación', value: p?.calificacion_promedio?.toFixed(1) ?? '—', icon: Star },
-          { label: 'Nivel', value: p?.nivel_confianza ?? 1, icon: User },
-        ].map(({ label, value, icon: Icon }) => (
-          <div key={label} className="card p-3 text-center">
-            <Icon size={16} className="text-brand mx-auto mb-1" />
-            <p className="text-lg font-bold text-ink-primary">{value}</p>
-            <p className="text-xs text-ink-muted">{label}</p>
-          </div>
-        ))}
-      </div>
-
-      {/* Quick links */}
-      <a href="/alertas" className="card p-4 mb-3 flex items-center justify-between">
-        <div>
-          <p className="text-sm font-medium text-ink-primary">🔔 Mis alertas de viaje</p>
-          <p className="text-xs text-ink-muted mt-0.5">Recibe aviso cuando salga un viaje</p>
+        <div className="card p-3 text-center">
+          <p className="text-xl">🚗</p>
+          <p className="text-xl font-bold text-ink-primary mt-1">{viajesChofer ?? 0}</p>
+          <p className="text-[10px] text-ink-muted mt-0.5">Como chofer</p>
         </div>
-        <span className="text-ink-muted text-lg">›</span>
-      </a>
-
-      {/* Placeholder sections */}
-      <div className="card p-4 mb-3">
-        <p className="text-sm font-medium text-ink-secondary">Editar perfil</p>
-        <p className="text-xs text-ink-muted mt-0.5">Próximamente — Fase 5</p>
+        <div className="card p-3 text-center">
+          <p className="text-xl">🎫</p>
+          <p className="text-xl font-bold text-ink-primary mt-1">{p?.total_viajes ?? 0}</p>
+          <p className="text-[10px] text-ink-muted mt-0.5">Total viajes</p>
+        </div>
+        <div className="card p-3 text-center">
+          <p className="text-xl">🏅</p>
+          <p className="text-xl font-bold text-ink-primary mt-1">{p?.nivel_confianza ?? 1}</p>
+          <p className="text-[10px] text-ink-muted mt-0.5">Nivel</p>
+        </div>
       </div>
-      <div className="card p-4 mb-3">
-        <p className="text-sm font-medium text-ink-secondary">Mi vehículo</p>
-        <p className="text-xs text-ink-muted mt-0.5">Próximamente — Fase 5</p>
+
+      {/* Pending ratings */}
+      {(pendingRating?.length ?? 0) > 0 && (
+        <div className="mb-4">
+          <p className="text-xs font-semibold text-ink-muted uppercase tracking-wider mb-2">Pendiente calificar</p>
+          {pendingRating!.map((v: any) => (
+            <Link
+              key={v.id}
+              href={`/calificar/${v.id}`}
+              className="card p-3 mb-2 flex items-center justify-between hover:border-brand/40"
+            >
+              <div>
+                <p className="text-sm font-medium text-ink-primary">{v.origen} → {v.destino}</p>
+                <p className="text-xs text-brand mt-0.5">⭐ Calificar ahora</p>
+              </div>
+              <span className="text-ink-muted">›</span>
+            </Link>
+          ))}
+        </div>
+      )}
+
+      {/* Recent reviews */}
+      {reviews.length > 0 && (
+        <div className="mb-4">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-xs font-semibold text-ink-muted uppercase tracking-wider">Mis reseñas</p>
+            <Link href={`/usuario/${user.id}`} className="text-xs text-brand">Ver todas</Link>
+          </div>
+          <div className="space-y-2">
+            {reviews.slice(0, 3).map((r: any) => (
+              <div key={r.id} className="card p-3">
+                <div className="flex items-center justify-between mb-1">
+                  <p className="text-xs font-medium text-ink-secondary">{r.de_user?.nombre ?? 'Usuario'}</p>
+                  <div className="flex">
+                    {[1,2,3,4,5].map(s => (
+                      <Star key={s} size={10} className={s <= r.estrellas ? 'text-warning fill-warning' : 'text-surface-subtle'} />
+                    ))}
+                  </div>
+                </div>
+                {r.comentario && (
+                  <p className="text-xs text-ink-secondary">"{r.comentario}"</p>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Links */}
+      <div className="space-y-2">
+        <Link href="/alertas" className="card p-4 flex items-center justify-between hover:border-brand/40">
+          <div>
+            <p className="text-sm font-medium text-ink-primary">🔔 Mis alertas de viaje</p>
+            <p className="text-xs text-ink-muted mt-0.5">Recibe aviso cuando salga un viaje</p>
+          </div>
+          <span className="text-ink-muted">›</span>
+        </Link>
+        <Link href={`/usuario/${user.id}`} className="card p-4 flex items-center justify-between hover:border-brand/40">
+          <div>
+            <p className="text-sm font-medium text-ink-primary">👤 Ver mi perfil público</p>
+            <p className="text-xs text-ink-muted mt-0.5">Así te ven otros usuarios</p>
+          </div>
+          <span className="text-ink-muted">›</span>
+        </Link>
+        <div className="card p-4">
+          <p className="text-sm font-medium text-ink-secondary">🚗 Mi vehículo</p>
+          <p className="text-xs text-ink-muted mt-0.5">Próximamente</p>
+        </div>
       </div>
     </div>
   )

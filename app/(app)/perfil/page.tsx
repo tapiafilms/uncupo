@@ -3,11 +3,12 @@ export const dynamic = 'force-dynamic'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { LogoutButton } from '@/components/auth/LogoutButton'
-import { Star, Car, Edit2 } from 'lucide-react'
+import { Star } from 'lucide-react'
 import Link from 'next/link'
 import type { DbUser } from '@/lib/types'
 import { calcularBadges } from '@/lib/badges'
 import { ProfileEditWrapper } from './ProfileEditWrapper'
+import { AvatarUpload } from '@/components/ui/AvatarUpload'
 
 export default async function PerfilPage() {
   const supabase = await createClient()
@@ -65,9 +66,11 @@ export default async function PerfilPage() {
       {/* Avatar + name + edit */}
       <div className="card p-5 mb-4">
         <div className="flex items-start gap-4">
-          <div className="w-16 h-16 rounded-full bg-brand/20 flex items-center justify-center text-2xl font-bold text-brand shrink-0">
-            {p?.nombre?.[0]?.toUpperCase() ?? '?'}
-          </div>
+          <AvatarUpload
+            userId={user.id}
+            nombre={p?.nombre ?? ''}
+            fotoUrl={p?.foto_url ?? null}
+          />
           <div className="flex-1 min-w-0">
             <ProfileEditWrapper userId={user.id} nombre={p?.nombre ?? ''} />
             <p className="text-sm text-ink-secondary mt-1">{p?.telefono ?? user.phone}</p>
@@ -177,10 +180,13 @@ export default async function PerfilPage() {
           </div>
           <span className="text-ink-muted">›</span>
         </Link>
-        <div className="card p-4">
-          <p className="text-sm font-medium text-ink-secondary">🚗 Mi vehículo</p>
-          <p className="text-xs text-ink-muted mt-0.5">Próximamente</p>
-        </div>
+        <Link href="/vehiculos" className="card p-4 flex items-center justify-between hover:border-brand/40">
+          <div>
+            <p className="text-sm font-medium text-ink-primary">🚗 Mis vehículos</p>
+            <p className="text-xs text-ink-muted mt-0.5">Agrega o edita tu auto</p>
+          </div>
+          <span className="text-ink-muted">›</span>
+        </Link>
       </div>
     </div>
   )

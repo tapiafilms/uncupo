@@ -60,6 +60,15 @@ export default async function PerfilPage() {
         ))}
       </div>
 
+      {/* Quick links */}
+      <a href="/alertas" className="card p-4 mb-3 flex items-center justify-between">
+        <div>
+          <p className="text-sm font-medium text-ink-primary">🔔 Mis alertas de viaje</p>
+          <p className="text-xs text-ink-muted mt-0.5">Recibe aviso cuando salga un viaje</p>
+        </div>
+        <span className="text-ink-muted text-lg">›</span>
+      </a>
+
       {/* Placeholder sections */}
       <div className="card p-4 mb-3">
         <p className="text-sm font-medium text-ink-secondary">Editar perfil</p>

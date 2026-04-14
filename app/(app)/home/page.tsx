@@ -2,7 +2,7 @@ import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
 import { TripCard } from '@/components/trips/TripCard'
 import { TripFilters } from '@/components/trips/TripFilters'
-import { Bell } from 'lucide-react'
+import { NotificationCenter } from '@/components/notifications/NotificationCenter'
 import type { ViajeConChofer } from '@/lib/types'
 
 interface HomePageProps {
@@ -82,10 +82,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           <p className="text-ink-muted text-sm">{saludo}</p>
           <h1 className="text-2xl font-bold text-ink-primary">{nombre} 👋</h1>
         </div>
-        <button className="relative w-10 h-10 rounded-full bg-surface-overlay flex items-center justify-center">
-          <Bell size={18} className="text-ink-secondary" />
-          <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-brand" />
-        </button>
+        <NotificationCenter userId={user!.id} />
       </div>
 
       {/* Filters */}

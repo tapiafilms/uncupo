@@ -100,6 +100,13 @@ export function PublishForm({ userId, vehiculos }: PublishFormProps) {
       return
     }
 
+    // Trigger IA alert matching in background (fire & forget)
+    fetch('/api/alertas/match', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ viajeId: data.id }),
+    }).catch(() => {})
+
     router.push(`/viajes/${data.id}?nuevo=1`)
   }
 

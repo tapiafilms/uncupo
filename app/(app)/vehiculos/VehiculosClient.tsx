@@ -1,9 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-import { ArrowLeft, Plus, Car, Edit2, CheckCircle } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { ArrowLeft, Plus, Car, Edit2, CheckCircle, Trash2, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import type { DbVehiculo } from '@/lib/types'
+import { createClient } from '@/lib/supabase/client'
 import { VehiculoForm } from './VehiculoForm'
 
 interface Props {
@@ -12,12 +14,24 @@ interface Props {
 }
 
 export function VehiculosClient({ userId, vehiculos }: Props) {
+  const router = useRouter()
+  const supabase = createClient()
   const [showForm, setShowForm] = useState(false)
   const [editing, setEditing] = useState<DbVehiculo | null>(null)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [confirmId, setConfirmId] = useState<string | null>(null)
 
   const openAdd = () => { setEditing(null); setShowForm(true) }
   const openEdit = (v: DbVehiculo) => { setEditing(v); setShowForm(true) }
   const closeForm = () => { setShowForm(false); setEditing(null) }
+
+  async function handleDelete(id: string) {
+    setDeletingId(id)
+    await supabase.from('vehiculos').delete().eq('id', id)
+    setDeletingId(null)
+    setConfirmId(null)
+    router.refresh()
+  }
 
   return (
     <div className="page-container">
@@ -77,6 +91,32 @@ export function VehiculosClient({ userId, vehiculos }: Props) {
               )}
 
               <div className="p-4">
+                {/* Confirm delete */}
+                {confirmId === v.id && (
+                  <div className="bg-danger/10 border border-danger/30 rounded-xl p-3 mb-3 animate-fade-in">
+                    <p className="text-sm text-danger font-medium mb-2">¿Eliminar este vehículo?</p>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setConfirmId(null)}
+                        className="btn-secondary flex-1 py-2 text-sm"
+                      >
+                        Cancelar
+                      </button>
+                      <button
+                        onClick={() => handleDelete(v.id)}
+                        disabled={deletingId === v.id}
+                        className="flex-1 py-2 rounded-xl bg-danger text-white text-sm font-semibold flex items-center justify-center gap-1.5 disabled:opacity-60"
+                      >
+                        {deletingId === v.id
+                          ? <Loader2 size={14} className="animate-spin" />
+                          : <Trash2 size={14} />
+                        }
+                        Eliminar
+                      </button>
+                    </div>
+                  </div>
+                )}
+
                 <div className="flex items-start justify-between">
                   <div>
                     <p className="font-bold text-ink-primary">
@@ -95,6 +135,12 @@ export function VehiculosClient({ userId, vehiculos }: Props) {
                       className="p-2 rounded-xl bg-surface-overlay text-ink-muted hover:text-brand transition-colors"
                     >
                       <Edit2 size={14} />
+                    </button>
+                    <button
+                      onClick={() => setConfirmId(v.id)}
+                      className="p-2 rounded-xl bg-surface-overlay text-ink-muted hover:text-danger transition-colors"
+                    >
+                      <Trash2 size={14} />
                     </button>
                   </div>
                 </div>

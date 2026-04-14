@@ -26,27 +26,36 @@ export function BottomNav() {
             ? MIS_VIAJES_PATHS.some(p => pathname === p || pathname.startsWith(p + '/'))
             : pathname === href || pathname.startsWith(href + '/')
 
+        // Botón Publicar — tratamiento especial, nunca "activo"
+        if (highlight) {
+          return (
+            <Link
+              key={href}
+              href={href}
+              className="flex flex-col items-center gap-1 pt-1 pb-1 px-3"
+            >
+              <div className="w-12 h-12 rounded-2xl bg-brand flex items-center justify-center shadow-glow active:scale-95 transition-transform duration-150">
+                <Icon size={22} strokeWidth={2} className="text-white" />
+              </div>
+              <span className="text-[10px] font-medium leading-none text-ink-muted">
+                {label}
+              </span>
+            </Link>
+          )
+        }
+
         return (
           <Link
             key={href}
             href={href}
             className={cn(
               'flex flex-col items-center gap-0.5 pt-2 pb-1 px-5 rounded-xl transition-all duration-150',
-              isActive && !highlight && 'text-brand',
-              !isActive && !highlight && 'text-ink-muted',
-              highlight && 'text-brand'
+              isActive ? 'text-brand' : 'text-ink-muted',
             )}
           >
-            <div className={cn(
-              'relative',
-              highlight && isActive && 'drop-shadow-[0_0_8px_rgba(108,99,255,0.8)]'
-            )}>
-              <Icon
-                size={22}
-                strokeWidth={isActive ? 2.5 : 1.8}
-                className={cn('transition-all duration-150', highlight && 'scale-110')}
-              />
-              {isActive && !highlight && (
+            <div className="relative">
+              <Icon size={22} strokeWidth={isActive ? 2.5 : 1.8} className="transition-all duration-150" />
+              {isActive && (
                 <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-brand" />
               )}
             </div>

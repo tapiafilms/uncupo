@@ -22,16 +22,17 @@ export function AlertaForm({ userId }: { userId: string }) {
   const [horaMax, setHoraMax] = useState('')
   const [precioMax, setPrecioMax] = useState('')
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!origen || !destino) return
+    setError(null)
     setLoading(true)
 
-    const { error } = await supabase.from('alertas').insert({
+    const { error: dbError } = await supabase.from('alertas').insert({
       pasajero_id: userId,
-      origen,
-      destino,
+      origen: origen || 'Cualquiera',
+      destino: destino || 'Cualquiera',
       fecha_min: fechaMin || null,
       fecha_max: fechaMax || null,
       hora_min: horaMin || null,
@@ -41,12 +42,14 @@ export function AlertaForm({ userId }: { userId: string }) {
     })
 
     setLoading(false)
-    if (!error) {
-      setOpen(false)
-      setOrigen(''); setDestino(''); setFechaMin(''); setFechaMax('')
-      setHoraMin(''); setHoraMax(''); setPrecioMax('')
-      router.refresh()
+    if (dbError) {
+      setError('No se pudo guardar la alerta. Intenta de nuevo.')
+      return
     }
+    setOpen(false)
+    setOrigen(''); setDestino(''); setFechaMin(''); setFechaMax('')
+    setHoraMin(''); setHoraMax(''); setPrecioMax('')
+    router.refresh()
   }
 
   const allLocations = [...PUNTOS_VINA, ...ZONAS_SANTIAGO]
@@ -152,7 +155,13 @@ export function AlertaForm({ userId }: { userId: string }) {
             />
           </div>
 
-          <button type="submit" disabled={loading || !origen || !destino} className="btn-primary w-full">
+          {error && (
+            <p className="text-danger text-sm bg-danger/10 border border-danger/30 rounded-xl px-3 py-2">
+              {error}
+            </p>
+          )}
+
+          <button type="submit" disabled={loading} className="btn-primary w-full">
             {loading ? 'Guardando…' : '🔔 Crear alerta'}
           </button>
         </form>

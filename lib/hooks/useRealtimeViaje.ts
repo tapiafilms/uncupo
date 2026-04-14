@@ -1,8 +1,8 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import type { DbViaje, DbReserva, TripState, PassengerState } from '@/lib/types'
+import type { DbViaje, DbReserva } from '@/lib/types'
 
 interface RealtimeViajeState {
   viaje: DbViaje | null
@@ -11,7 +11,9 @@ interface RealtimeViajeState {
 }
 
 export function useRealtimeViaje(viajeId: string) {
-  const supabase = createClient()
+  // useRef evita recrcar el cliente en cada render
+  const supabase = useRef(createClient()).current
+
   const [state, setState] = useState<RealtimeViajeState>({
     viaje: null,
     reservas: [],
@@ -24,7 +26,7 @@ export function useRealtimeViaje(viajeId: string) {
       supabase.from('reservas').select('*').eq('viaje_id', viajeId),
     ])
     setState({ viaje: viaje as DbViaje, reservas: (reservas as DbReserva[]) ?? [], loading: false })
-  }, [viajeId])
+  }, [viajeId, supabase])
 
   useEffect(() => {
     fetchData()
@@ -42,7 +44,6 @@ export function useRealtimeViaje(viajeId: string) {
         'postgres_changes',
         { event: '*', schema: 'public', table: 'reservas', filter: `viaje_id=eq.${viajeId}` },
         () => {
-          // Refetch reservas on any change
           supabase
             .from('reservas')
             .select('*')
@@ -57,13 +58,13 @@ export function useRealtimeViaje(viajeId: string) {
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [viajeId, fetchData])
+  }, [viajeId, fetchData, supabase])
 
   return state
 }
 
 export function useRealtimeReserva(reservaId: string) {
-  const supabase = createClient()
+  const supabase = useRef(createClient()).current
   const [reserva, setReserva] = useState<DbReserva | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -92,7 +93,7 @@ export function useRealtimeReserva(reservaId: string) {
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [reservaId])
+  }, [reservaId, supabase])
 
   return { reserva, loading }
 }

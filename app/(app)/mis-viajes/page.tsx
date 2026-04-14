@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { createClient } from '@/lib/supabase/server'
 import { TripCard } from '@/components/trips/TripCard'
 import type { ViajeConChofer } from '@/lib/types'
@@ -30,9 +32,40 @@ export default async function MisViajesPage() {
   const activosPasajero = tripsPasajero.filter(v => !['finalizado', 'cancelado'].includes(v?.estado))
   const pasadosPasajero = tripsPasajero.filter(v =>  ['finalizado', 'cancelado'].includes(v?.estado))
 
+  // Check for in-progress trips to show shortcut banners
+  const viajeEnCurso = activosChofer.find(v => ['en_camino', 'en_destino', 'confirmado'].includes(v.estado))
+  const reservaEnCurso = reservas?.find((r: any) =>
+    !['pago_confirmado'].includes(r.estado_pasajero) &&
+    !['finalizado', 'cancelado'].includes(r.viaje?.estado)
+  )
+
   return (
     <div className="page-container">
       <h1 className="text-2xl font-bold text-ink-primary pt-2 mb-6">Mis Viajes</h1>
+
+      {/* Shortcut — active trip (driver) */}
+      {viajeEnCurso && (
+        <a href="/viaje-activo" className="flex items-center gap-3 bg-brand/10 border border-brand/30 rounded-2xl p-4 mb-5 animate-pulse-dot">
+          <span className="text-2xl">🚗</span>
+          <div className="flex-1">
+            <p className="text-brand font-bold text-sm">Viaje en curso</p>
+            <p className="text-brand/70 text-xs">{viajeEnCurso.origen} → {viajeEnCurso.destino}</p>
+          </div>
+          <span className="text-brand text-xs font-semibold">Ver →</span>
+        </a>
+      )}
+
+      {/* Shortcut — active reservation (passenger) */}
+      {reservaEnCurso && (
+        <a href="/reserva-activa" className="flex items-center gap-3 bg-success/10 border border-success/30 rounded-2xl p-4 mb-5 animate-pulse-dot">
+          <span className="text-2xl">🎫</span>
+          <div className="flex-1">
+            <p className="text-success font-bold text-sm">Reserva activa</p>
+            <p className="text-success/70 text-xs capitalize">{(reservaEnCurso as any).estado_pasajero?.replace('_', ' ')}</p>
+          </div>
+          <span className="text-success text-xs font-semibold">Ver →</span>
+        </a>
+      )}
 
       {/* --- CHOFER --- */}
       <Section title="🚗 Como Chofer — Activos">

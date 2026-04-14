@@ -6,11 +6,14 @@ import { Home, CalendarDays, PlusCircle, User } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const NAV_ITEMS = [
-  { href: '/home', icon: Home, label: 'Inicio' },
-  { href: '/mis-viajes', icon: CalendarDays, label: 'Mis Viajes' },
-  { href: '/publicar', icon: PlusCircle, label: 'Publicar', highlight: true },
-  { href: '/perfil', icon: User, label: 'Perfil' },
+  { href: '/home',           icon: Home,        label: 'Inicio' },
+  { href: '/mis-viajes',     icon: CalendarDays, label: 'Mis Viajes' },
+  { href: '/publicar',       icon: PlusCircle,  label: 'Publicar', highlight: true },
+  { href: '/perfil',         icon: User,        label: 'Perfil' },
 ]
+
+// Rutas que pertenecen al tab "Mis Viajes"
+const MIS_VIAJES_PATHS = ['/mis-viajes', '/viaje-activo', '/reserva-activa']
 
 export function BottomNav() {
   const pathname = usePathname()
@@ -18,7 +21,10 @@ export function BottomNav() {
   return (
     <nav className="bottom-nav">
       {NAV_ITEMS.map(({ href, icon: Icon, label, highlight }) => {
-        const isActive = pathname === href || pathname.startsWith(href + '/')
+        const isActive =
+          href === '/mis-viajes'
+            ? MIS_VIAJES_PATHS.some(p => pathname === p || pathname.startsWith(p + '/'))
+            : pathname === href || pathname.startsWith(href + '/')
 
         return (
           <Link
@@ -38,10 +44,7 @@ export function BottomNav() {
               <Icon
                 size={22}
                 strokeWidth={isActive ? 2.5 : 1.8}
-                className={cn(
-                  'transition-all duration-150',
-                  highlight && 'scale-110'
-                )}
+                className={cn('transition-all duration-150', highlight && 'scale-110')}
               />
               {isActive && !highlight && (
                 <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-brand" />

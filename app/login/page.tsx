@@ -7,12 +7,10 @@ export default function LoginPage() {
     <main className="min-h-dvh bg-surface-base flex flex-col items-center justify-center px-6">
       {/* Logo / Brand */}
       <div className="mb-10 text-center">
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-brand/20 mb-4">
-          <span className="text-3xl">🚗</span>
-        </div>
+        <img src="/logo.png" alt="UnCupo" className="w-16 h-16 object-contain mx-auto mb-4" />
         <h1 className="text-3xl font-bold gradient-text">UnCupo</h1>
         <p className="text-ink-secondary mt-2 text-sm">
-          Viña del Mar ↔ Santiago
+          Montemar ↔ Santiago
         </p>
         <p className="text-ink-muted mt-1 text-xs">
           Ingresa con tu email — sin contraseña

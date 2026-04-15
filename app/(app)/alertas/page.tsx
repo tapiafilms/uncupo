@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { AlertaForm } from './AlertaForm'
 import { AlertasList } from './AlertasList'
+import { AppHeader } from '@/components/layout/AppHeader'
 
 export default async function AlertasPage() {
   const supabase = await createClient()
@@ -18,8 +19,9 @@ export default async function AlertasPage() {
 
   return (
     <div className="page-container">
-      <div className="pt-2 mb-6">
-        <h1 className="text-2xl font-bold text-ink-primary">Mis Alertas</h1>
+      <AppHeader />
+      <div className="mb-6">
+        <h1 className="text-xl font-bold text-ink-primary">Mis Alertas</h1>
         <p className="text-sm text-ink-secondary mt-1">
           Te avisamos cuando aparezca un viaje que te interesa
         </p>

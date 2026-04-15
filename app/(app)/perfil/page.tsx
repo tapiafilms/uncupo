@@ -9,6 +9,7 @@ import type { DbUser } from '@/lib/types'
 import { calcularBadges } from '@/lib/badges'
 import { ProfileEditWrapper } from './ProfileEditWrapper'
 import { AvatarUpload } from '@/components/ui/AvatarUpload'
+import { AppHeader } from '@/components/layout/AppHeader'
 
 export default async function PerfilPage() {
   const supabase = await createClient()
@@ -57,11 +58,8 @@ export default async function PerfilPage() {
 
   return (
     <div className="page-container">
-      {/* Header */}
-      <div className="flex items-center justify-between pt-2 mb-5">
-        <h1 className="text-2xl font-bold text-ink-primary">Perfil</h1>
-        <LogoutButton />
-      </div>
+      <AppHeader right={<LogoutButton />} />
+      <h1 className="text-xl font-bold text-ink-primary mb-5">Perfil</h1>
 
       {/* Avatar + name + edit */}
       <div className="card p-5 mb-4">

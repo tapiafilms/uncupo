@@ -34,9 +34,7 @@ export default function HomeLoading() {
     <div className="page-container">
       {/* Header */}
       <div className="flex items-center justify-between pt-2 mb-4">
-        <div className="flex items-center gap-2">
-          <img src="/logo.png" alt="UnCupo" className="h-8 w-auto object-contain" />
-        </div>
+        <img src="/logo.png" alt="UnCupo" className="h-16 w-auto object-contain" />
         <Skeleton className="w-8 h-8 rounded-full" />
       </div>
 

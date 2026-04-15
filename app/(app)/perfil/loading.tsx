@@ -3,10 +3,11 @@ import { Skeleton } from '@/components/ui/Skeleton'
 export default function PerfilLoading() {
   return (
     <div className="page-container">
-      <div className="flex items-center justify-between pt-2 mb-5">
-        <Skeleton className="h-7 w-20" />
+      <div className="flex items-center justify-between pt-2 mb-4">
+        <img src="/logo.png" alt="UnCupo" className="h-16 w-auto object-contain" />
         <Skeleton className="h-9 w-20 rounded-xl" />
       </div>
+      <Skeleton className="h-6 w-16 mb-5" />
 
       {/* Avatar + nombre */}
       <div className="card p-5 mb-4">

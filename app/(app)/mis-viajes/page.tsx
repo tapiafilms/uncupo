@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic'
 
 import { createClient } from '@/lib/supabase/server'
 import { TripCard } from '@/components/trips/TripCard'
+import { AppHeader } from '@/components/layout/AppHeader'
 import type { ViajeConChofer } from '@/lib/types'
 
 export default async function MisViajesPage() {
@@ -41,7 +42,8 @@ export default async function MisViajesPage() {
 
   return (
     <div className="page-container">
-      <h1 className="text-2xl font-bold text-ink-primary pt-2 mb-6">Mis Viajes</h1>
+      <AppHeader />
+      <h1 className="text-xl font-bold text-ink-primary mb-5">Mis Viajes</h1>
 
       {/* Shortcut — active trip (driver) */}
       {viajeEnCurso && (

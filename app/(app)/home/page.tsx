@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/server'
 import { TripCard } from '@/components/trips/TripCard'
 import { TripFilters } from '@/components/trips/TripFilters'
 import { NotificationCenter } from '@/components/notifications/NotificationCenter'
+import { AppHeader } from '@/components/layout/AppHeader'
 import type { ViajeConChofer } from '@/lib/types'
 
 interface HomePageProps {
@@ -66,11 +67,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   return (
     <div className="page-container">
 
-      {/* App header con logo */}
-      <div className="flex items-center justify-between pt-2 mb-4">
-        <img src="/logo.png" alt="UnCupo" className="h-8 w-auto object-contain" />
-        <NotificationCenter userId={user!.id} />
-      </div>
+      <AppHeader right={<NotificationCenter userId={user!.id} />} />
 
       {/* Saludo con avatar */}
       <div className="flex items-center gap-3 mb-5">

@@ -19,9 +19,10 @@ function TripRowSkeleton() {
 export default function MisViajesLoading() {
   return (
     <div className="page-container">
-      <div className="flex items-center justify-between pt-2 mb-5">
-        <Skeleton className="h-7 w-32" />
+      <div className="flex items-center justify-between pt-2 mb-4">
+        <img src="/logo.png" alt="UnCupo" className="h-16 w-auto object-contain" />
       </div>
+      <Skeleton className="h-6 w-28 mb-5" />
       <div className="flex gap-2 mb-5">
         <Skeleton className="flex-1 h-9" />
         <Skeleton className="flex-1 h-9" />

@@ -106,4 +106,25 @@
   .gradient-text {
     @apply bg-gradient-to-r from-brand to-brand-light bg-clip-text text-transparent;
   }
+
+  /* Skeleton shimmer */
+  .skeleton {
+    @apply rounded-xl bg-surface-overlay relative overflow-hidden;
+  }
+  .skeleton::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255,255,255,0.04) 50%,
+      transparent 100%
+    );
+    animation: shimmer 1.4s infinite;
+  }
+  @keyframes shimmer {
+    from { transform: translateX(-100%); }
+    to   { transform: translateX(100%); }
+  }
 }

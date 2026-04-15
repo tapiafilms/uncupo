@@ -85,7 +85,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           <AppHeader right={<NotificationCenter userId={user!.id} />} />
 
           {/* Saludo con avatar */}
-          <div className="flex items-center gap-3 mb-5">
+          <div className="flex items-center gap-3 mb-5 pt-8">
             <div className="w-10 h-10 rounded-full overflow-hidden shrink-0 bg-brand/20 flex items-center justify-center ring-2 ring-white/20">
               {fotoUrl
                 ? <img src={fotoUrl} alt={nombre} className="w-full h-full object-cover" />

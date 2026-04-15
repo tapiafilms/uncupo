@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { formatPrice, cn } from '@/lib/utils'
+import { formatPrice } from '@/lib/utils'
 import type { TripState, PassengerState } from '@/lib/types'
 
 const ESTADO_PASAJERO_LABELS: Record<PassengerState, string> = {
@@ -49,26 +49,18 @@ export function ReserveButton({
     setLoading(true)
     setError(null)
 
-    const { error: err } = await supabase
-      .from('reservas')
-      .insert({
-        viaje_id: viajeId,
-        pasajero_id: pasajeroId,
-        estado_pasajero: 'reservado',
-        pago_confirmado: false,
-      })
+    const res = await fetch('/api/reservas/nueva', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ viajeId }),
+    })
 
     setLoading(false)
     setShowConfirm(false)
 
-    if (err) {
-      if (err.message.includes('horario')) {
-        setError('Ya tienes otro viaje reservado en ese horario.')
-      } else if (err.code === '23505') {
-        setError('Ya tienes una reserva en este viaje.')
-      } else {
-        setError('No se pudo reservar. Intenta nuevamente.')
-      }
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}))
+      setError(data.error || 'No se pudo reservar. Intenta nuevamente.')
       return
     }
 
@@ -175,7 +167,7 @@ export function ReserveButton({
     )
   }
 
-  // Available to reserve
+  // ── Available to reserve ──
   return (
     <div className="space-y-2">
       {showConfirm ? (
@@ -199,24 +191,42 @@ export function ReserveButton({
               disabled={loading}
               className="btn-primary text-sm py-3"
             >
-              {loading ? 'Reservando…' : 'Confirmar'}
+              {loading ? 'Reservando…' : '¡Reservar!'}
             </button>
           </div>
+          {error && (
+            <p className="text-danger text-xs text-center animate-fade-in">{error}</p>
+          )}
         </div>
       ) : (
-        <button
-          onClick={() => setShowConfirm(true)}
-          className={cn(
-            'btn-primary w-full py-4 text-base font-bold',
-            'shadow-glow'
-          )}
-        >
-          Reservar cupo · {formatPrice(precio)}
-        </button>
-      )}
+        <>
+          <button
+            onClick={() => setShowConfirm(true)}
+            className="relative w-full py-4 rounded-2xl font-bold text-base text-white
+                       bg-gradient-to-r from-brand to-brand-dark
+                       shadow-lg shadow-brand/40
+                       active:scale-95 transition-all duration-150
+                       overflow-hidden group"
+          >
+            {/* Brillo animado */}
+            <span
+              className="absolute inset-0 translate-x-[-100%] group-hover:translate-x-[100%]
+                         transition-transform duration-700
+                         bg-gradient-to-r from-transparent via-white/20 to-transparent"
+            />
+            <span className="relative flex items-center justify-center gap-2">
+              <span className="text-xl">🎫</span>
+              <span>Reservar cupo</span>
+              <span className="ml-1 bg-white/20 rounded-lg px-2 py-0.5 text-sm font-semibold">
+                {formatPrice(precio)}
+              </span>
+            </span>
+          </button>
 
-      {error && (
-        <p className="text-danger text-xs text-center animate-fade-in">{error}</p>
+          {error && (
+            <p className="text-danger text-xs text-center animate-fade-in">{error}</p>
+          )}
+        </>
       )}
     </div>
   )

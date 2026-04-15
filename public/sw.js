@@ -52,17 +52,19 @@ self.addEventListener('notificationclick', (event) => {
 
   if (event.action === 'dismiss') return
 
-  const url = event.notification.data?.url ?? '/'
+  const path = event.notification.data?.url ?? '/'
+  // navigate() requires an absolute URL; openWindow also benefits from it
+  const fullUrl = path.startsWith('http') ? path : self.location.origin + path
 
   event.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
-      const existing = clients.find((c) => c.url.includes(self.location.origin))
+      const existing = clients.find((c) => c.url.startsWith(self.location.origin))
       if (existing) {
-        existing.focus()
-        existing.navigate(url)
-      } else {
-        self.clients.openWindow(url)
+        // postMessage lets the Next.js router handle navigation (works on iOS too)
+        existing.postMessage({ type: 'SW_NAVIGATE', url: path })
+        return existing.focus()
       }
+      return self.clients.openWindow(fullUrl)
     })
   )
 })

@@ -73,7 +73,7 @@ export default async function PerfilPage() {
           />
           <div className="flex-1 min-w-0">
             <ProfileEditWrapper userId={user.id} nombre={p?.nombre ?? ''} />
-            <p className="text-sm text-ink-secondary mt-1">{p?.telefono ?? user.phone}</p>
+            <p className="text-xs text-ink-muted mt-1">{user.email}</p>
             {p && Number(p.calificacion_promedio) > 0 && (
               <div className="flex items-center gap-1 mt-1">
                 <Star size={13} className="text-warning fill-warning" />

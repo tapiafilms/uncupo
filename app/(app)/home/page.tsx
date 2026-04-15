@@ -6,6 +6,7 @@ import { TripCard } from '@/components/trips/TripCard'
 import { TripFilters } from '@/components/trips/TripFilters'
 import { NotificationCenter } from '@/components/notifications/NotificationCenter'
 import { AppHeader } from '@/components/layout/AppHeader'
+import { RefreshButton } from '@/components/ui/RefreshButton'
 import type { ViajeConChofer } from '@/lib/types'
 
 interface HomePageProps {
@@ -108,12 +109,15 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       {/* ── Contenido ── */}
       <div className="max-w-md mx-auto px-4 pb-24 pt-3">
 
-      {/* Contador */}
-      <p className="text-xs font-semibold text-ink-muted mb-3">
-        {trips.length > 0
-          ? `${trips.length} viaje${trips.length !== 1 ? 's' : ''} disponible${trips.length !== 1 ? 's' : ''}`
-          : 'Sin viajes publicados'}
-      </p>
+      {/* Contador + Actualizar */}
+      <div className="flex items-center justify-between mb-3">
+        <p className="text-xs font-semibold text-ink-muted">
+          {trips.length > 0
+            ? `${trips.length} viaje${trips.length !== 1 ? 's' : ''} disponible${trips.length !== 1 ? 's' : ''}`
+            : 'Sin viajes publicados'}
+        </p>
+        <RefreshButton />
+      </div>
 
       {/* Lista de viajes */}
       {trips.length === 0 ? (

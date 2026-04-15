@@ -18,13 +18,15 @@ export function usePushNotifications(userId: string | null) {
     }
     setPermission(Notification.permission as PermissionStatus)
 
-    // Check if already subscribed
+    // getRegistration() responde inmediatamente (no bloquea como .ready)
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.ready.then((reg) => {
-        reg.pushManager.getSubscription().then((sub) => {
-          setSubscribed(!!sub)
-        })
-      })
+      navigator.serviceWorker.getRegistration().then((reg) => {
+        if (reg) {
+          reg.pushManager.getSubscription().then((sub) => {
+            setSubscribed(!!sub)
+          }).catch(() => {})
+        }
+      }).catch(() => {})
     }
   }, [])
 
@@ -33,9 +35,12 @@ export function usePushNotifications(userId: string | null) {
     setLoading(true)
 
     try {
-      // Register SW
-      const reg = await navigator.serviceWorker.register('/sw.js')
-      await navigator.serviceWorker.ready
+      // Register SW con timeout de 5s para no colgar
+      await navigator.serviceWorker.register('/sw.js')
+      const reg = await Promise.race([
+        navigator.serviceWorker.ready,
+        new Promise<never>((_, reject) => setTimeout(() => reject(new Error('SW timeout')), 5000)),
+      ])
 
       // Request permission
       const perm = await Notification.requestPermission()

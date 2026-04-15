@@ -1,6 +1,6 @@
 // UnCupo Service Worker — Web Push + Offline Cache
 
-const CACHE_NAME = 'uncupo-v1'
+const CACHE_NAME = 'uncupo-v2'
 const OFFLINE_URL = '/offline'
 
 // ── Install ──────────────────────────────────────────────

@@ -161,8 +161,8 @@ export function PublishForm({ userId, vehiculos }: PublishFormProps) {
         </label>
         <div className="grid grid-cols-2 gap-2">
           {([
-            { key: 'vina_santiago', label: 'Viña → Santiago' },
-            { key: 'santiago_vina', label: 'Santiago → Viña' },
+            { key: 'vina_santiago', label: 'Montemar → Santiago' },
+            { key: 'santiago_vina', label: 'Santiago → Montemar' },
           ] as const).map(({ key, label }) => (
             <button
               key={key}
@@ -331,15 +331,15 @@ export function PublishForm({ userId, vehiculos }: PublishFormProps) {
         </div>
       )}
 
-      {/* Notes */}
+      {/* Dirección de salida */}
       <div>
         <label className="flex items-center gap-2 text-xs font-semibold text-ink-secondary uppercase tracking-wider mb-2">
-          <FileText size={12} /> Notas (opcional)
+          <FileText size={12} /> Dirección de salida
         </label>
         <textarea
           value={notas}
           onChange={(e) => setNotas(e.target.value)}
-          placeholder="Ej: paso por Viña Centro, no mascotas, música suave..."
+          placeholder="Ej: Calle Los Pinos 123, frente al portón verde"
           className="input resize-none"
           rows={3}
           maxLength={300}

@@ -127,13 +127,10 @@ export interface ReservaConViaje extends DbReserva {
 // ─── Constants ───────────────────────────────────────────────────────────────
 
 export const PUNTOS_VINA = [
-  'Reloj de Flores',
-  'Achupallas',
-  'Viña Centro',
-  'Reñaca',
-  'Concón',
-  'Quilpué',
-  'Villa Alemana',
+  'Bosques de Montemar',
+  'Costa de Montemar',
+  'Lomas de Montemar',
+  'Pinares de Montemar',
 ] as const
 
 export const ZONAS_SANTIAGO = [

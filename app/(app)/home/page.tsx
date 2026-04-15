@@ -67,28 +67,46 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   const saludo = Number(hora) < 12 ? 'Buenos días' : Number(hora) < 20 ? 'Buenas tardes' : 'Buenas noches'
 
   return (
-    <div className="page-container">
+    <div>
 
-      <AppHeader right={<NotificationCenter userId={user!.id} />} />
+      {/* ── Hero con imagen de fondo ── */}
+      <div
+        className="relative bg-cover bg-center px-4 pt-4 pb-6"
+        style={{ backgroundImage: "url('/bg-header.png')" }}
+      >
+        {/* Overlay oscuro para legibilidad */}
+        <div className="absolute inset-0 bg-surface-base/60" />
 
-      {/* Saludo con avatar */}
-      <div className="flex items-center gap-3 mb-5">
-        <div className="w-9 h-9 rounded-full overflow-hidden shrink-0 bg-brand/20 flex items-center justify-center">
-          {fotoUrl
-            ? <img src={fotoUrl} alt={nombre} className="w-full h-full object-cover" />
-            : <span className="text-sm font-bold text-brand">{nombre[0]?.toUpperCase()}</span>
-          }
-        </div>
-        <div>
-          <p className="text-xs text-ink-muted leading-none mb-0.5">{saludo}</p>
-          <p className="text-base font-bold text-ink-primary leading-none">{nombre} 👋</p>
+        {/* Gradiente inferior para fusión suave */}
+        <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-b from-transparent to-surface-base" />
+
+        {/* Contenido sobre la imagen */}
+        <div className="relative z-10">
+          <AppHeader right={<NotificationCenter userId={user!.id} />} />
+
+          {/* Saludo con avatar */}
+          <div className="flex items-center gap-3 mb-5">
+            <div className="w-10 h-10 rounded-full overflow-hidden shrink-0 bg-brand/20 flex items-center justify-center ring-2 ring-white/20">
+              {fotoUrl
+                ? <img src={fotoUrl} alt={nombre} className="w-full h-full object-cover" />
+                : <span className="text-sm font-bold text-brand">{nombre[0]?.toUpperCase()}</span>
+              }
+            </div>
+            <div>
+              <p className="text-xs text-white/60 leading-none mb-0.5">{saludo}</p>
+              <p className="text-base font-bold text-white leading-none">{nombre} 👋</p>
+            </div>
+          </div>
+
+          {/* Filtro de días */}
+          <Suspense>
+            <TripFilters />
+          </Suspense>
         </div>
       </div>
 
-      {/* Filtro de días */}
-      <Suspense>
-        <TripFilters />
-      </Suspense>
+      {/* ── Contenido ── */}
+      <div className="max-w-md mx-auto px-4 pb-24 pt-3">
 
       {/* Contador */}
       <p className="text-xs font-semibold text-ink-muted mb-3">
@@ -107,6 +125,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           ))}
         </div>
       )}
+      </div>
     </div>
   )
 }

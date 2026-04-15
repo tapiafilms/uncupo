@@ -14,6 +14,7 @@ interface HomePageProps {
 
 function getDateRange(dia: string): { from: string; to: string } {
   const tz    = 'America/Santiago'
+  const now   = new Date()
   const today = new Date(new Date().toLocaleString('en-US', { timeZone: tz }))
   today.setHours(0, 0, 0, 0)
 
@@ -26,9 +27,10 @@ function getDateRange(dia: string): { from: string; to: string } {
     const end = new Date(today); end.setDate(end.getDate() + 7)
     return { from: today.toISOString(), to: end.toISOString() }
   }
-  // hoy — desde inicio del día para mostrar todos los viajes aunque ya pasaron
-  const end = new Date(today); end.setDate(end.getDate() + 1)
-  return { from: today.toISOString(), to: end.toISOString() }
+  // hoy — ocultar viajes que salieron hace más de 15 minutos
+  const grace = new Date(now.getTime() - 15 * 60 * 1000)
+  const end   = new Date(today); end.setDate(end.getDate() + 1)
+  return { from: grace.toISOString(), to: end.toISOString() }
 }
 
 export default async function HomePage({ searchParams }: HomePageProps) {

@@ -7,8 +7,7 @@ export default function LoginPage() {
     <main className="min-h-dvh bg-surface-base flex flex-col items-center justify-center px-6">
       {/* Logo / Brand */}
       <div className="mb-10 text-center">
-        <img src="/logo.png" alt="UnCupo" className="w-16 h-16 object-contain mx-auto mb-4" />
-        <h1 className="text-3xl font-bold gradient-text">UnCupo</h1>
+        <img src="/logo.png" alt="UnCupo" className="h-20 w-auto object-contain mx-auto mb-4" />
         <p className="text-ink-secondary mt-2 text-sm">
           Montemar ↔ Santiago
         </p>

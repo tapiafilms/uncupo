@@ -68,10 +68,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
 
       {/* App header con logo */}
       <div className="flex items-center justify-between pt-2 mb-4">
-        <div className="flex items-center gap-2">
-          <img src="/logo.png" alt="UnCupo" className="w-8 h-8 object-contain" />
-          <span className="text-lg font-bold gradient-text">UnCupo</span>
-        </div>
+        <img src="/logo.png" alt="UnCupo" className="h-8 w-auto object-contain" />
         <NotificationCenter userId={user!.id} />
       </div>
 

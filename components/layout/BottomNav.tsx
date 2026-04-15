@@ -53,7 +53,6 @@ export function BottomNav() {
             )}
           >
             <motion.div
-              className="relative"
               whileTap={{ scale: 1.25 }}
               transition={{ type: 'spring', stiffness: 500, damping: 15 }}
             >
@@ -62,13 +61,6 @@ export function BottomNav() {
                 strokeWidth={isActive ? 2.5 : 1.8}
                 className="transition-all duration-150"
               />
-              {isActive && (
-                <motion.span
-                  layoutId="nav-dot"
-                  className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-brand"
-                  transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                />
-              )}
             </motion.div>
             <span className={cn(
               'text-[10px] font-medium leading-none',
@@ -76,6 +68,15 @@ export function BottomNav() {
             )}>
               {label}
             </span>
+            <div className="h-1 flex items-center justify-center">
+              {isActive && (
+                <motion.span
+                  layoutId="nav-dot"
+                  className="w-4 h-0.5 rounded-full bg-brand block"
+                  transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                />
+              )}
+            </div>
           </Link>
         )
       })}

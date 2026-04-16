@@ -8,34 +8,14 @@ import { NotificationCenter } from '@/components/notifications/NotificationCente
 import { AppHeader } from '@/components/layout/AppHeader'
 import { RefreshButton } from '@/components/ui/RefreshButton'
 import type { ViajeConChofer } from '@/lib/types'
+import { PUNTOS_VINA } from '@/lib/types'
 
 interface HomePageProps {
-  searchParams: Promise<{ dia?: string }>
-}
-
-function getDateRange(dia: string): { from: string; to: string } {
-  const tz    = 'America/Santiago'
-  const now   = new Date()
-  const today = new Date(new Date().toLocaleString('en-US', { timeZone: tz }))
-  today.setHours(0, 0, 0, 0)
-
-  if (dia === 'manana') {
-    const start = new Date(today); start.setDate(start.getDate() + 1)
-    const end   = new Date(today); end.setDate(end.getDate() + 2)
-    return { from: start.toISOString(), to: end.toISOString() }
-  }
-  if (dia === 'semana') {
-    const end = new Date(today); end.setDate(end.getDate() + 7)
-    return { from: today.toISOString(), to: end.toISOString() }
-  }
-  // hoy — ocultar viajes que salieron hace más de 15 minutos
-  const grace = new Date(now.getTime() - 15 * 60 * 1000)
-  const end   = new Date(today); end.setDate(end.getDate() + 1)
-  return { from: grace.toISOString(), to: end.toISOString() }
+  searchParams: Promise<{ ruta?: string }>
 }
 
 export default async function HomePage({ searchParams }: HomePageProps) {
-  const { dia = 'hoy' } = await searchParams
+  const { ruta = 'vina-stgo' } = await searchParams
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -45,20 +25,29 @@ export default async function HomePage({ searchParams }: HomePageProps) {
     .eq('id', user!.id)
     .single()
 
-  const { from, to } = getDateRange(dia)
+  // Mostrar viajes desde hace 15 min en adelante, próximos 30 días
+  const now = new Date(new Date().getTime() - 15 * 60 * 1000)
+  const max = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000)
 
-  const { data: viajes } = await supabase
+  // Filtro de dirección
+  const puntosVina = PUNTOS_VINA as unknown as string[]
+  let query = supabase
     .from('viajes')
-    .select(`
-      *,
-      chofer:users!viajes_chofer_id_fkey(*),
-      vehiculo:vehiculos(*)
-    `)
-    .gte('fecha_hora', from)
-    .lt('fecha_hora', to)
+    .select(`*, chofer:users!viajes_chofer_id_fkey(*), vehiculo:vehiculos(*)`)
+    .gte('fecha_hora', now.toISOString())
+    .lt('fecha_hora', max.toISOString())
     .in('estado', ['publicado', 'confirmado'])
+    .gt('cupos_disponibles', 0)
     .order('fecha_hora', { ascending: true })
     .limit(50)
+
+  if (ruta === 'vina-stgo') {
+    query = query.in('origen', puntosVina)
+  } else {
+    query = query.in('destino', puntosVina)
+  }
+
+  const { data: viajes } = await query
 
   const trips  = (viajes ?? []) as unknown as ViajeConChofer[]
   const nombre = profile?.nombre?.split(' ')[0] || 'Viajero'
@@ -69,23 +58,17 @@ export default async function HomePage({ searchParams }: HomePageProps) {
 
   return (
     <div>
-
       {/* ── Hero con imagen de fondo ── */}
       <div
         className="relative bg-cover bg-center px-4 pt-4 pb-6"
         style={{ backgroundImage: "url('/bg-header.png')" }}
       >
-        {/* Overlay oscuro para legibilidad */}
         <div className="absolute inset-0 bg-surface-base/60" />
-
-        {/* Gradiente inferior para fusión suave */}
         <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-b from-transparent to-surface-base" />
 
-        {/* Contenido sobre la imagen */}
         <div className="relative z-10">
           <AppHeader right={<NotificationCenter userId={user!.id} />} />
 
-          {/* Saludo con avatar */}
           <div className="flex items-center gap-3 mb-5 pt-8">
             <div className="w-10 h-10 rounded-full overflow-hidden shrink-0 bg-brand/20 flex items-center justify-center ring-2 ring-white/20">
               {fotoUrl
@@ -99,7 +82,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
             </div>
           </div>
 
-          {/* Filtro de días */}
+          {/* Filtro de dirección */}
           <Suspense>
             <TripFilters />
           </Suspense>
@@ -108,33 +91,31 @@ export default async function HomePage({ searchParams }: HomePageProps) {
 
       {/* ── Contenido ── */}
       <div className="max-w-md mx-auto px-4 pb-24 pt-3">
-
-      {/* Contador + Actualizar */}
-      <div className="flex items-center justify-between mb-3">
-        <p className="text-xs font-semibold text-ink-muted">
-          {trips.length > 0
-            ? `${trips.length} viaje${trips.length !== 1 ? 's' : ''} disponible${trips.length !== 1 ? 's' : ''}`
-            : 'Sin viajes publicados'}
-        </p>
-        <RefreshButton />
-      </div>
-
-      {/* Lista de viajes */}
-      {trips.length === 0 ? (
-        <EmptyState dia={dia} />
-      ) : (
-        <div className="space-y-3 animate-fade-in">
-          {trips.map((viaje) => (
-            <TripCard key={viaje.id} viaje={viaje} />
-          ))}
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-xs font-semibold text-ink-muted">
+            {trips.length > 0
+              ? `${trips.length} viaje${trips.length !== 1 ? 's' : ''} disponible${trips.length !== 1 ? 's' : ''}`
+              : 'Sin viajes publicados'}
+          </p>
+          <RefreshButton />
         </div>
-      )}
+
+        {trips.length === 0 ? (
+          <EmptyState ruta={ruta} />
+        ) : (
+          <div className="space-y-3 animate-fade-in">
+            {trips.map((viaje) => (
+              <TripCard key={viaje.id} viaje={viaje} />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )
 }
 
-function EmptyState({ dia }: { dia: string }) {
+function EmptyState({ ruta }: { ruta: string }) {
+  const dir = ruta === 'vina-stgo' ? 'Viña → Santiago' : 'Santiago → Viña'
   return (
     <div className="flex flex-col items-center justify-center py-16 text-center animate-fade-in">
       <div className="w-20 h-20 rounded-full bg-surface-overlay flex items-center justify-center mb-4">
@@ -142,9 +123,7 @@ function EmptyState({ dia }: { dia: string }) {
       </div>
       <p className="text-ink-primary font-semibold text-lg">No hay viajes</p>
       <p className="text-ink-muted text-sm mt-1 max-w-xs">
-        {dia === 'hoy'    && 'No hay viajes publicados para hoy. ¡Publica el tuyo!'}
-        {dia === 'manana' && 'Nadie ha publicado para mañana aún.'}
-        {dia === 'semana' && 'No hay viajes esta semana todavía.'}
+        No hay viajes publicados en dirección {dir}. ¡Publica el tuyo!
       </p>
       <a href="/publicar" className="btn-primary mt-6 inline-flex items-center gap-2 text-sm">
         + Publicar viaje

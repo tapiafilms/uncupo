@@ -80,6 +80,16 @@ export function DriverTripView({ viajeId, viajeInicial, reservasIniciales, chofe
       .from('viajes')
       .update({ estado: nextState.state })
       .eq('id', viajeId)
+
+    // Al finalizar, notificar a todos que califiquen
+    if (nextState.state === 'finalizado') {
+      fetch('/api/viajes/notificar-calificacion', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ viajeId }),
+      }).catch(() => {})
+    }
+
     setAdvancing(false)
   }
 

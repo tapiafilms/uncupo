@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic'
 
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
-import { Star, Car, ArrowLeft, MapPin } from 'lucide-react'
+import { Star, Car, ArrowLeft, MapPin, ShieldCheck } from 'lucide-react'
 import Link from 'next/link'
 import { calcularBadges } from '@/lib/badges'
 import { formatDateTime } from '@/lib/utils'
@@ -104,6 +104,14 @@ export default async function UsuarioPage({ params }: PageProps) {
           <div className="flex items-center justify-center gap-1 mt-1.5 text-ink-muted">
             <MapPin size={12} />
             <span className="text-xs">{sector}</span>
+          </div>
+        )}
+
+        {/* Identidad verificada */}
+        {user.rut && (
+          <div className="flex items-center justify-center gap-1.5 mt-2">
+            <ShieldCheck size={14} className="text-success" />
+            <span className="text-xs font-semibold text-success">Identidad verificada</span>
           </div>
         )}
 

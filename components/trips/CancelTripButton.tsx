@@ -60,7 +60,7 @@ export function CancelTripButton({ viajeId }: { viajeId: string }) {
   return (
     <button
       onClick={() => setConfirm(true)}
-      className="flex items-center gap-1.5 text-danger/60 hover:text-danger text-xs font-medium mt-2 transition-colors"
+      className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full transition-all active:scale-95 bg-danger/10 text-danger hover:bg-danger/20"
     >
       <Trash2 size={12} />
       Cancelar viaje

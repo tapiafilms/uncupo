@@ -32,11 +32,11 @@ export function ShareTripButton({ viaje }: ShareTripButtonProps) {
   return (
     <button
       onClick={handleShare}
-      className="flex items-center gap-1.5 text-xs text-ink-secondary hover:text-brand transition-colors px-1 py-1"
+      className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full transition-all active:scale-95 bg-brand/10 text-brand hover:bg-brand/20"
     >
       {copied
-        ? <><Check size={13} className="text-success" /><span className="text-success">¡Copiado!</span></>
-        : <><Share2 size={13} /><span>Compartir</span></>
+        ? <><Check size={12} /><span>¡Copiado!</span></>
+        : <><Share2 size={12} /><span>Compartir</span></>
       }
     </button>
   )

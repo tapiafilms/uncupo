@@ -88,7 +88,7 @@ export default async function MisViajesPage() {
           : activosChofer.map(v => (
               <div key={v.id}>
                 <TripCard viaje={v} />
-                <div className="px-1 flex items-center gap-3">
+                <div className="px-1 pt-2 flex items-center gap-2">
                   <ShareTripButton viaje={v} />
                   {!['en_camino', 'en_destino'].includes(v.estado) && (
                     <CancelTripButton viajeId={v.id} />

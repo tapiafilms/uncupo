@@ -1,12 +1,15 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, lazy, Suspense } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { PUNTOS_VINA, ZONAS_SANTIAGO } from '@/lib/types'
 import type { DbVehiculo } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import { MapPin, Clock, Users, DollarSign, FileText, Car, ChevronDown, Sparkles } from 'lucide-react'
+import type { LatLng } from '@/components/map/MapPicker'
+
+const MapPicker = lazy(() => import('@/components/map/MapPicker').then(m => ({ default: m.MapPicker })))
 
 interface PublishFormProps {
   userId: string
@@ -27,6 +30,7 @@ export function PublishForm({ userId, vehiculos }: PublishFormProps) {
   const [cupos, setCupos] = useState(3)
   const [precio, setPrecio] = useState(4000)
   const [notas, setNotas] = useState('')
+  const [puntoCoords, setPuntoCoords] = useState<LatLng | null>(null)
   const [vehiculoId, setVehiculoId] = useState(vehiculos[0]?.id ?? '')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -88,6 +92,8 @@ export function PublishForm({ userId, vehiculos }: PublishFormProps) {
         cupos_disponibles: cupos,
         precio_cupo: precio,
         notas: notas || null,
+        punto_encuentro_lat: puntoCoords?.lat ?? null,
+        punto_encuentro_lng: puntoCoords?.lng ?? null,
         estado: 'publicado',
       })
       .select('id')
@@ -331,20 +337,35 @@ export function PublishForm({ userId, vehiculos }: PublishFormProps) {
         </div>
       )}
 
-      {/* Dirección de salida */}
+      {/* Punto de encuentro */}
       <div>
         <label className="flex items-center gap-2 text-xs font-semibold text-ink-secondary uppercase tracking-wider mb-2">
-          <FileText size={12} /> Dirección de salida
+          <MapPin size={12} className="text-brand" /> Punto de encuentro
         </label>
         <textarea
           value={notas}
           onChange={(e) => setNotas(e.target.value)}
           placeholder="Ej: Calle Los Pinos 123, frente al portón verde"
-          className="input resize-none"
-          rows={3}
+          className="input resize-none mb-2"
+          rows={2}
           maxLength={300}
         />
-        <p className="text-xs text-ink-muted text-right mt-1">{notas.length}/300</p>
+        <Suspense fallback={
+          <div className="h-[240px] rounded-xl bg-surface-overlay border border-surface-border flex items-center justify-center">
+            <p className="text-xs text-ink-muted">Cargando mapa…</p>
+          </div>
+        }>
+          <MapPicker
+            value={puntoCoords}
+            onChange={(coords, address) => {
+              setPuntoCoords(coords)
+              if (!notas) setNotas(address)
+            }}
+          />
+        </Suspense>
+        <p className="text-xs text-ink-muted mt-1.5">
+          Busca una dirección o toca el mapa para marcar el punto exacto
+        </p>
       </div>
 
       {error && (

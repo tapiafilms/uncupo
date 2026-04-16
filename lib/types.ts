@@ -34,6 +34,8 @@ export interface DbUser {
   nombre: string
   telefono: string
   foto_url: string | null
+  sector: string
+  rut: string | null
   nivel_confianza: number
   calificacion_promedio: number
   total_viajes: number
@@ -125,6 +127,21 @@ export interface ReservaConViaje extends DbReserva {
 }
 
 // ─── Constants ───────────────────────────────────────────────────────────────
+
+export const SECTORES = [
+  'Bosques de Montemar',
+  'Costa de Montemar',
+  'Lomas de Montemar',
+  'Pinares de Montemar',
+  'Reñaca',
+  'Viña del Mar centro',
+  'Concón',
+  'Quilpué',
+  'Villa Alemana',
+  'Valparaíso',
+  'Santiago',
+  'Otro',
+] as const
 
 export const PUNTOS_VINA = [
   'Bosques de Montemar',

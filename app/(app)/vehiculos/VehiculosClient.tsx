@@ -11,19 +11,27 @@ import { VehiculoForm } from './VehiculoForm'
 interface Props {
   userId: string
   vehiculos: DbVehiculo[]
+  next?: string
 }
 
-export function VehiculosClient({ userId, vehiculos }: Props) {
+export function VehiculosClient({ userId, vehiculos, next }: Props) {
   const router = useRouter()
   const supabase = createClient()
-  const [showForm, setShowForm] = useState(false)
+  const [showForm, setShowForm] = useState(vehiculos.length === 0)
   const [editing, setEditing] = useState<DbVehiculo | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [confirmId, setConfirmId] = useState<string | null>(null)
 
   const openAdd = () => { setEditing(null); setShowForm(true) }
   const openEdit = (v: DbVehiculo) => { setEditing(v); setShowForm(true) }
-  const closeForm = () => { setShowForm(false); setEditing(null) }
+  const closeForm = () => {
+    setShowForm(false)
+    setEditing(null)
+    // Si viene de publicar y acaba de agregar (no editar), redirigir
+    if (next && !editing) {
+      router.push(next)
+    }
+  }
 
   async function handleDelete(id: string) {
     setDeletingId(id)
@@ -37,10 +45,12 @@ export function VehiculosClient({ userId, vehiculos }: Props) {
     <div className="page-container">
       {/* Header */}
       <div className="flex items-center gap-3 pt-2 mb-5">
-        <Link href="/perfil" className="btn-ghost p-2 -ml-2">
+        <Link href={next ?? '/perfil'} className="btn-ghost p-2 -ml-2">
           <ArrowLeft size={20} />
         </Link>
-        <h1 className="text-lg font-bold text-ink-primary flex-1">Mis vehículos</h1>
+        <h1 className="text-lg font-bold text-ink-primary flex-1">
+          {next ? 'Agregar tu auto' : 'Mis vehículos'}
+        </h1>
         {!showForm && (
           <button onClick={openAdd} className="btn-primary px-4 py-2 text-sm flex items-center gap-1.5">
             <Plus size={15} />

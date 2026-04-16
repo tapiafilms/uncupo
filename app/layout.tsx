@@ -2,17 +2,23 @@ import type { Metadata, Viewport } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'UnCupo — Viajes Viña ↔ Santiago',
+  title: 'UNcupo — Viajes Viña ↔ Santiago',
   description: 'Comparte viaje entre Viña del Mar y Santiago. Sin WhatsApp, sin intermediarios.',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
-    title: 'UnCupo',
+    title: 'UNcupo',
+    startupImage: '/apple-touch-icon.png',
   },
   icons: {
-    icon: '/icon.png',
-    apple: '/apple-icon.png',
+    icon: [
+      { url: '/icon-192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/icon-512.png', sizes: '512x512', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+    ],
   },
 }
 

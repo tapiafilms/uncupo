@@ -6,7 +6,11 @@ import { useRealtimeReserva } from '@/lib/hooks/useRealtimeViaje'
 import { useRealtimeViaje } from '@/lib/hooks/useRealtimeViaje'
 import { formatTime, formatPrice, cn } from '@/lib/utils'
 import type { PassengerState, TripState } from '@/lib/types'
-import { MapPin, Clock, Car, User, CheckCircle, AlertCircle } from 'lucide-react'
+import { MapPin, Clock, Car, User, CheckCircle, AlertCircle, MessageCircle } from 'lucide-react'
+import Link from 'next/link'
+import dynamic from 'next/dynamic'
+
+const MapView = dynamic(() => import('@/components/map/MapView').then(m => m.MapView), { ssr: false })
 
 // Passenger state machine
 const PASSENGER_STEPS: { key: PassengerState; label: string; emoji: string; desc: string }[] = [
@@ -49,6 +53,8 @@ export function PassengerTripView({ reservaId, reservaInicial, pasajeroId }: Pro
   const currentViaje = viaje ?? reservaInicial?.viaje
 
   const [advancing, setAdvancing] = useState(false)
+  const [cancelando, setCancelando] = useState(false)
+  const [confirmCancel, setConfirmCancel] = useState(false)
 
   const estadoPasajero = (currentReserva?.estado_pasajero ?? 'reservado') as PassengerState
   const estadoViaje    = (currentViaje?.estado ?? 'publicado') as TripState
@@ -57,6 +63,19 @@ export function PassengerTripView({ reservaId, reservaInicial, pasajeroId }: Pro
   const tripMsg        = TRIP_STATE_MESSAGES[estadoViaje]
   const pagado         = currentReserva?.pago_confirmado
   const chofer         = reservaInicial?.viaje?.chofer
+
+  async function handleCancelReserva() {
+    setCancelando(true)
+    const res = await fetch('/api/reservas/cancelar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ reservaId }),
+    })
+    setCancelando(false)
+    if (res.ok) {
+      window.location.href = '/home'
+    }
+  }
 
   async function advancePassengerState() {
     if (!nextStep) return
@@ -144,6 +163,27 @@ export function PassengerTripView({ reservaId, reservaInicial, pasajeroId }: Pro
         </div>
       </div>
 
+      {/* Punto de encuentro con mapa */}
+      {(currentViaje?.notas || currentViaje?.punto_encuentro_lat) && (
+        <div className="card p-4 mb-4">
+          <div className="flex items-center gap-2 mb-3">
+            <MapPin size={14} className="text-brand" />
+            <p className="text-xs font-semibold text-ink-muted uppercase tracking-wider">Punto de encuentro</p>
+          </div>
+          {currentViaje.notas && (
+            <p className="text-sm text-ink-primary mb-3">{currentViaje.notas}</p>
+          )}
+          {currentViaje.punto_encuentro_lat && currentViaje.punto_encuentro_lng && (
+            <MapView
+              lat={currentViaje.punto_encuentro_lat}
+              lng={currentViaje.punto_encuentro_lng}
+              label={currentViaje.notas}
+              height={200}
+            />
+          )}
+        </div>
+      )}
+
       {/* Driver info */}
       {chofer && (
         <div className="card p-4 mb-4">
@@ -171,6 +211,20 @@ export function PassengerTripView({ reservaId, reservaInicial, pasajeroId }: Pro
               </p>
             </div>
           )}
+          {!(['finalizado', 'cancelado'] as string[]).includes(estadoViaje) && (
+            <div className="mt-3 pt-3 border-t border-surface-border">
+              <Link
+                href={`/chat/${reservaId}`}
+                className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl
+                           bg-surface-base border border-surface-border
+                           text-ink-primary font-semibold text-sm
+                           active:scale-95 transition-all"
+              >
+                <MessageCircle size={15} className="text-brand" />
+                Chat con el chofer
+              </Link>
+            </div>
+          )}
         </div>
       )}
 
@@ -185,6 +239,39 @@ export function PassengerTripView({ reservaId, reservaInicial, pasajeroId }: Pro
           <a href="/home" className="btn-secondary w-full mt-4 block text-center text-sm">
             Volver al inicio
           </a>
+        </div>
+      )}
+
+      {/* Cancelar reserva — solo si el viaje no empezó */}
+      {['publicado', 'confirmado'].includes(estadoViaje) && estadoPasajero === 'reservado' && (
+        <div className="mb-24">
+          {confirmCancel ? (
+            <div className="bg-danger/10 border border-danger/30 rounded-2xl p-4 animate-fade-in">
+              <p className="text-sm text-danger font-medium mb-3">¿Cancelar tu reserva?</p>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setConfirmCancel(false)}
+                  className="btn-secondary flex-1 py-2.5 text-sm"
+                >
+                  Mantener
+                </button>
+                <button
+                  onClick={handleCancelReserva}
+                  disabled={cancelando}
+                  className="flex-1 py-2.5 rounded-xl bg-danger text-white text-sm font-semibold disabled:opacity-60"
+                >
+                  {cancelando ? 'Cancelando…' : 'Sí, cancelar'}
+                </button>
+              </div>
+            </div>
+          ) : (
+            <button
+              onClick={() => setConfirmCancel(true)}
+              className="btn-ghost w-full text-danger/60 text-sm"
+            >
+              Cancelar reserva
+            </button>
+          )}
         </div>
       )}
 

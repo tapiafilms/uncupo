@@ -5,7 +5,8 @@ import { createClient } from '@/lib/supabase/client'
 import { useRealtimeViaje } from '@/lib/hooks/useRealtimeViaje'
 import { formatTime, formatPrice, cn } from '@/lib/utils'
 import type { TripState, PassengerState, DbViaje, DbReserva } from '@/lib/types'
-import { Users, MapPin, ChevronRight, CheckCircle, Clock, AlertCircle } from 'lucide-react'
+import { Users, MapPin, ChevronRight, CheckCircle, Clock, AlertCircle, MessageCircle } from 'lucide-react'
+import Link from 'next/link'
 
 // Trip state machine — valid next states for driver
 const NEXT_TRIP_STATE: Partial<Record<TripState, { state: TripState; label: string; color: string }>> = {
@@ -196,26 +197,35 @@ export function DriverTripView({ viajeId, viajeInicial, reservasIniciales, chofe
                     </div>
 
                     {/* Action */}
-                    {isPagado ? (
-                      <span className="flex items-center gap-1 text-xs text-success font-semibold">
-                        <CheckCircle size={14} /> Pagado
-                      </span>
-                    ) : isLlego ? (
-                      <button
-                        onClick={() => confirmPago(r.id)}
-                        disabled={confirmingPago === r.id}
-                        className="bg-success/10 border border-success/30 text-success text-xs font-bold rounded-xl px-3 py-2 active:scale-95 transition-all"
+                    <div className="flex items-center gap-2">
+                      <Link
+                        href={`/chat/${r.id}`}
+                        className="w-8 h-8 rounded-xl bg-surface-overlay border border-surface-border
+                                   flex items-center justify-center text-brand active:scale-95 transition-all"
                       >
-                        {confirmingPago === r.id ? '…' : `💰 ${formatPrice((currentViaje as any)?.precio_cupo ?? 4000)}`}
-                      </button>
-                    ) : (
-                      <span className={cn(
-                        'text-lg',
-                        estado === 'en_el_punto' && 'animate-pulse-dot'
-                      )}>
-                        {PASSENGER_STATE_EMOJI[estado]}
-                      </span>
-                    )}
+                        <MessageCircle size={14} />
+                      </Link>
+                      {isPagado ? (
+                        <span className="flex items-center gap-1 text-xs text-success font-semibold">
+                          <CheckCircle size={14} /> Pagado
+                        </span>
+                      ) : isLlego ? (
+                        <button
+                          onClick={() => confirmPago(r.id)}
+                          disabled={confirmingPago === r.id}
+                          className="bg-success/10 border border-success/30 text-success text-xs font-bold rounded-xl px-3 py-2 active:scale-95 transition-all"
+                        >
+                          {confirmingPago === r.id ? '…' : `💰 ${formatPrice((currentViaje as any)?.precio_cupo ?? 4000)}`}
+                        </button>
+                      ) : (
+                        <span className={cn(
+                          'text-lg',
+                          estado === 'en_el_punto' && 'animate-pulse-dot'
+                        )}>
+                          {PASSENGER_STATE_EMOJI[estado]}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
               )

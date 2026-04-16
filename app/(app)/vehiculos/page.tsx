@@ -5,7 +5,12 @@ import { redirect } from 'next/navigation'
 import type { DbVehiculo } from '@/lib/types'
 import { VehiculosClient } from './VehiculosClient'
 
-export default async function VehiculosPage() {
+interface PageProps {
+  searchParams: Promise<{ next?: string }>
+}
+
+export default async function VehiculosPage({ searchParams }: PageProps) {
+  const { next } = await searchParams
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
@@ -20,6 +25,7 @@ export default async function VehiculosPage() {
     <VehiculosClient
       userId={user.id}
       vehiculos={(vehiculos ?? []) as DbVehiculo[]}
+      next={next}
     />
   )
 }

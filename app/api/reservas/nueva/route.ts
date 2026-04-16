@@ -21,7 +21,7 @@ export async function POST(req: Request) {
   // 3. Obtener datos del viaje + chofer
   const { data: viaje } = await supabase
     .from('viajes')
-    .select('*, chofer:users!viajes_chofer_id_fkey(id, nombre, email)')
+    .select('*, chofer:users!viajes_chofer_id_fkey(id, nombre)')
     .eq('id', viajeId)
     .single()
 
@@ -40,7 +40,7 @@ export async function POST(req: Request) {
   const nombrePasajero = pasajero?.nombre || 'Un pasajero'
 
   // 5. Crear la reserva
-  const { error: reservaError } = await supabase
+  const { data: reservaData, error: reservaError } = await supabase
     .from('reservas')
     .insert({
       viaje_id: viajeId,
@@ -48,6 +48,8 @@ export async function POST(req: Request) {
       estado_pasajero: 'reservado',
       pago_confirmado: false,
     })
+    .select('id')
+    .single()
 
   if (reservaError) {
     if (reservaError.message?.includes('horario')) {
@@ -59,13 +61,23 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'No se pudo reservar.' }, { status: 500 })
   }
 
+  // 5b. Insertar saludo automático del chofer en el chat
+  const nombreChofer = (viaje.chofer as { nombre: string })?.nombre || 'El chofer'
+  if (reservaData?.id) {
+    await supabase.from('mensajes').insert({
+      reserva_id: reservaData.id,
+      de_user_id: viaje.chofer_id,
+      texto: `Hola, soy ${nombreChofer}. Gracias por preferirme, ¿me confirmas tu cupo?`,
+    })
+  }
+
   // 6. Notificación in-app al chofer
   const resumen = `${viaje.origen} → ${viaje.destino} · ${formatDateTime(viaje.fecha_hora)}`
   await supabase.from('notificaciones').insert({
     user_id: viaje.chofer_id,
     tipo: 'nueva_reserva',
-    titulo: `🎫 ${nombrePasajero} reservó un cupo`,
-    mensaje: resumen,
+    titulo: `🎫 ${nombrePasajero} quiere un cupo`,
+    mensaje: `${resumen} — Entra a confirmarle el viaje`,
     leido: false,
   })
 
@@ -83,9 +95,9 @@ export async function POST(req: Request) {
           sendPushNotification(
             { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
             {
-              title: `🎫 Nueva reserva de ${nombrePasajero}`,
-              body: resumen,
-              url: `/viajes/${viajeId}`,
+              title: `🎫 ${nombrePasajero} quiere un cupo`,
+              body: `${resumen} — Toca para confirmarle`,
+              url: `/viaje-activo`,
               tag: `reserva-${viajeId}`,
             }
           )
@@ -94,5 +106,5 @@ export async function POST(req: Request) {
     }
   }
 
-  return NextResponse.json({ ok: true })
+  return NextResponse.json({ ok: true, reservaId: reservaData?.id })
 }

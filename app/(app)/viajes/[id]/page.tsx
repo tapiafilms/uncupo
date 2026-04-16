@@ -9,6 +9,7 @@ import type { ViajeConChofer, DbReserva } from '@/lib/types'
 import { ReserveButton } from './ReserveButton'
 import { TripStatusBadge } from './TripStatusBadge'
 import { PassengerList } from './PassengerList'
+import { TripMap } from './TripMap'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -177,6 +178,41 @@ export default async function ViajeDetailPage({ params, searchParams }: PageProp
           ))}
         </div>
       </div>
+
+      {/* Punto de encuentro con mapa */}
+      {((trip as any).notas || (trip as any).punto_encuentro_lat) && (
+        <div className="card p-4 mb-4">
+          <div className="flex items-center gap-2 mb-3">
+            <MapPin size={14} className="text-brand" />
+            <p className="text-xs font-semibold text-ink-muted uppercase tracking-wider">Punto de encuentro</p>
+          </div>
+          {(trip as any).notas && (
+            <p className="text-sm text-ink-primary mb-3">{(trip as any).notas}</p>
+          )}
+          {(trip as any).punto_encuentro_lat && (trip as any).punto_encuentro_lng && (
+            <TripMap
+              lat={(trip as any).punto_encuentro_lat}
+              lng={(trip as any).punto_encuentro_lng}
+              label={(trip as any).notas}
+            />
+          )}
+        </div>
+      )}
+
+      {/* Confirm trip CTA — driver with pending passengers */}
+      {isDriver && trip.estado === 'publicado' && pasajeros.length > 0 && (
+        <a
+          href="/viaje-activo"
+          className="flex items-center gap-3 bg-brand/10 border border-brand/30 rounded-2xl p-4 mb-4"
+        >
+          <span className="text-2xl">✅</span>
+          <div className="flex-1">
+            <p className="text-brand font-bold text-sm">Tienes pasajeros esperando</p>
+            <p className="text-brand/70 text-xs">Entra a confirmarles el viaje</p>
+          </div>
+          <span className="text-brand text-xs font-semibold">Confirmar →</span>
+        </a>
+      )}
 
       {/* Passenger list (driver only) */}
       {isDriver && pasajeros.length > 0 && (

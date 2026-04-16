@@ -12,7 +12,7 @@ export default function LoginPage() {
           Montemar ↔ Santiago
         </p>
         <p className="text-ink-muted mt-1 text-xs">
-          Ingresa con tu email — sin contraseña
+          Ingresa con tu cuenta
         </p>
       </div>
 

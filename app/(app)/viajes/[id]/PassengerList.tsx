@@ -5,7 +5,8 @@ import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import type { PassengerState } from '@/lib/types'
-import { CheckCircle, Circle } from 'lucide-react'
+import { CheckCircle, Circle, MessageCircle } from 'lucide-react'
+import Link from 'next/link'
 
 const ESTADOS: { key: PassengerState; label: string; emoji: string }[] = [
   { key: 'reservado',       label: 'Reservado',       emoji: '📋' },
@@ -69,21 +70,30 @@ export function PassengerList({
                     {estadoInfo?.emoji} {estadoInfo?.label ?? p.estado}
                   </p>
                 </div>
-                {p.estado === 'llego' && !pagado && (
-                  <button
-                    onClick={() => confirmPago(p.id)}
-                    disabled={loading === p.id}
-                    className="bg-success/10 border border-success/30 text-success text-xs font-semibold rounded-xl px-3 py-2 active:scale-95 transition-all"
+                <div className="flex items-center gap-2">
+                  <Link
+                    href={`/chat/${p.id}`}
+                    className="w-8 h-8 rounded-xl bg-surface-overlay border border-surface-border
+                               flex items-center justify-center text-brand active:scale-95 transition-all"
                   >
-                    {loading === p.id ? '…' : '💰 Confirmar pago'}
-                  </button>
-                )}
-                {pagado && (
-                  <span className="flex items-center gap-1 text-xs text-success font-medium">
-                    <CheckCircle size={14} />
-                    Pagado
-                  </span>
-                )}
+                    <MessageCircle size={14} />
+                  </Link>
+                  {p.estado === 'llego' && !pagado && (
+                    <button
+                      onClick={() => confirmPago(p.id)}
+                      disabled={loading === p.id}
+                      className="bg-success/10 border border-success/30 text-success text-xs font-semibold rounded-xl px-3 py-2 active:scale-95 transition-all"
+                    >
+                      {loading === p.id ? '…' : '💰 Confirmar pago'}
+                    </button>
+                  )}
+                  {pagado && (
+                    <span className="flex items-center gap-1 text-xs text-success font-medium">
+                      <CheckCircle size={14} />
+                      Pagado
+                    </span>
+                  )}
+                </div>
               </div>
 
               {/* Progress steps */}

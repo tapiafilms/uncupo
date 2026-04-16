@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { formatPrice } from '@/lib/utils'
 import type { TripState, PassengerState } from '@/lib/types'
+import { MessageCircle } from 'lucide-react'
+import Link from 'next/link'
 
 const ESTADO_PASAJERO_LABELS: Record<PassengerState, string> = {
   reservado:       '✅ Reservado',
@@ -64,7 +66,12 @@ export function ReserveButton({
       return
     }
 
-    router.refresh()
+    const data = await res.json().catch(() => ({}))
+    if (data.reservaId) {
+      router.push(`/chat/${data.reservaId}`)
+    } else {
+      router.refresh()
+    }
   }
 
   async function handleCancelar() {
@@ -116,6 +123,19 @@ export function ReserveButton({
             Pagas {formatPrice(precio)} al chofer al llegar
           </p>
         </div>
+
+        {reservaId && (
+          <Link
+            href={`/chat/${reservaId}`}
+            className="flex items-center justify-center gap-2 w-full py-3 rounded-2xl
+                       bg-surface-overlay border border-surface-border
+                       text-ink-primary font-semibold text-sm
+                       active:scale-95 transition-all"
+          >
+            <MessageCircle size={16} className="text-brand" />
+            Chat con el chofer
+          </Link>
+        )}
 
         {['reservado', 'en_camino', 'en_el_punto'].includes(estadoPasajero) && (
           <>

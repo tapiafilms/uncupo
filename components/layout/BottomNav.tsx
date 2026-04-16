@@ -18,6 +18,9 @@ const MIS_VIAJES_PATHS = ['/mis-viajes', '/viaje-activo', '/reserva-activa']
 
 export function BottomNav() {
   const pathname = usePathname()
+
+  // Hide bottom nav in full-screen views
+  if (pathname.startsWith('/chat/')) return null
   const [pendingHref, setPendingHref] = useState<string | null>(null)
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 

@@ -46,7 +46,7 @@ export default async function CalificarPage({ params }: PageProps) {
   if (isDriver) {
     // Driver rates each passenger
     aCalificar = reservas
-      .filter((r: any) => r.pago_confirmado && !yaCalificadosIds.includes(r.pasajero_id))
+      .filter((r: any) => !yaCalificadosIds.includes(r.pasajero_id))
       .map((r: any) => ({
         id: r.pasajero_id,
         nombre: r.pasajero?.nombre || 'Pasajero',
@@ -54,11 +54,9 @@ export default async function CalificarPage({ params }: PageProps) {
       }))
   } else {
     // Passenger rates driver (if not already rated)
-    if (!yaCalificadosIds.includes(viaje.chofer_id)) {
-      const reservaPropia = reservas.find((r: any) => r.pasajero_id === user.id)
-      if (reservaPropia?.pago_confirmado) {
-        aCalificar = [{ id: viaje.chofer_id, nombre: (viaje.chofer as any)?.nombre || 'Chofer', rol: 'chofer' }]
-      }
+    const reservaPropia = reservas.find((r: any) => r.pasajero_id === user.id)
+    if (reservaPropia && !yaCalificadosIds.includes(viaje.chofer_id)) {
+      aCalificar = [{ id: viaje.chofer_id, nombre: (viaje.chofer as any)?.nombre || 'Chofer', rol: 'chofer' }]
     }
   }
 

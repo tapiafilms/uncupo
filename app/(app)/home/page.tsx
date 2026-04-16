@@ -11,11 +11,11 @@ import type { ViajeConChofer } from '@/lib/types'
 import { PUNTOS_VINA } from '@/lib/types'
 
 interface HomePageProps {
-  searchParams: Promise<{ ruta?: string }>
+  searchParams: Promise<{ ruta?: string; fecha?: string; hora?: string }>
 }
 
 export default async function HomePage({ searchParams }: HomePageProps) {
-  const { ruta = 'vina-stgo' } = await searchParams
+  const { ruta = 'vina-stgo', fecha = '', hora: horaFiltro = '' } = await searchParams
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -25,17 +25,27 @@ export default async function HomePage({ searchParams }: HomePageProps) {
     .eq('id', user!.id)
     .single()
 
-  // Mostrar viajes desde hace 15 min en adelante, próximos 30 días
+  // Rango de fechas según filtros
   const now = new Date(new Date().getTime() - 15 * 60 * 1000)
-  const max = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000)
+  let desde: Date
+  let hasta: Date
+
+  if (fecha) {
+    const timeStr = horaFiltro ? `${horaFiltro}:00` : '00:00:00'
+    desde = new Date(`${fecha}T${timeStr}-04:00`)
+    hasta = new Date(`${fecha}T23:59:59-04:00`)
+  } else {
+    desde = now
+    hasta = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000)
+  }
 
   // Filtro de dirección
   const puntosVina = PUNTOS_VINA as unknown as string[]
   let query = supabase
     .from('viajes')
     .select(`*, chofer:users!viajes_chofer_id_fkey(*), vehiculo:vehiculos(*)`)
-    .gte('fecha_hora', now.toISOString())
-    .lt('fecha_hora', max.toISOString())
+    .gte('fecha_hora', desde.toISOString())
+    .lt('fecha_hora', hasta.toISOString())
     .in('estado', ['publicado', 'confirmado'])
     .gt('cupos_disponibles', 0)
     .order('fecha_hora', { ascending: true })

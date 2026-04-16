@@ -10,6 +10,7 @@ import { calcularBadges } from '@/lib/badges'
 import { ProfileEditWrapper } from './ProfileEditWrapper'
 import { AvatarUpload } from '@/components/ui/AvatarUpload'
 import { AppHeader } from '@/components/layout/AppHeader'
+import { RutForm } from '@/components/perfil/RutForm'
 
 export default async function PerfilPage() {
   const supabase = await createClient()
@@ -82,6 +83,12 @@ export default async function PerfilPage() {
               </div>
             )}
           </div>
+        </div>
+
+        {/* RUT */}
+        <div className="mt-4 pt-4 border-t border-surface-border">
+          <p className="text-xs font-semibold text-ink-muted uppercase tracking-wider mb-2">RUT</p>
+          <RutForm userId={user.id} rutActual={p?.rut ?? null} />
         </div>
 
         {/* Badges */}

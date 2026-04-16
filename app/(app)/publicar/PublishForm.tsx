@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, lazy, Suspense } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { PUNTOS_VINA, ZONAS_SANTIAGO } from '@/lib/types'
 import type { DbVehiculo } from '@/lib/types'
@@ -18,20 +18,39 @@ interface PublishFormProps {
 
 type Direccion = 'vina_santiago' | 'santiago_vina'
 
+function detectDireccion(origen: string, destino: string): Direccion {
+  const puntosVina = PUNTOS_VINA as unknown as string[]
+  if (puntosVina.includes(origen)) return 'vina_santiago'
+  if (puntosVina.includes(destino)) return 'santiago_vina'
+  return 'vina_santiago'
+}
+
 export function PublishForm({ userId, vehiculos }: PublishFormProps) {
   const router = useRouter()
   const supabase = createClient()
+  const searchParams = useSearchParams()
 
-  const [direccion, setDireccion] = useState<Direccion>('vina_santiago')
-  const [origen, setOrigen] = useState('')
-  const [destino, setDestino] = useState('')
+  // Pre-fill desde "Repetir viaje"
+  const preOrigen    = searchParams.get('origen')    ?? ''
+  const preDestino   = searchParams.get('destino')   ?? ''
+  const preCupos     = Number(searchParams.get('cupos'))   || 3
+  const prePrecio    = Number(searchParams.get('precio'))  || 4000
+  const preNotas     = searchParams.get('notas')     ?? ''
+  const preVehiculo  = searchParams.get('vehiculoId') ?? vehiculos[0]?.id ?? ''
+  const preDireccion = (preOrigen || preDestino)
+    ? detectDireccion(preOrigen, preDestino)
+    : 'vina_santiago'
+
+  const [direccion, setDireccion] = useState<Direccion>(preDireccion)
+  const [origen, setOrigen] = useState(preOrigen)
+  const [destino, setDestino] = useState(preDestino)
   const [fecha, setFecha] = useState(getTodayLocal())
   const [hora, setHora] = useState('07:00')
-  const [cupos, setCupos] = useState(3)
-  const [precio, setPrecio] = useState(4000)
-  const [notas, setNotas] = useState('')
+  const [cupos, setCupos] = useState(preCupos)
+  const [precio, setPrecio] = useState(prePrecio)
+  const [notas, setNotas] = useState(preNotas)
   const [puntoCoords, setPuntoCoords] = useState<LatLng | null>(null)
-  const [vehiculoId, setVehiculoId] = useState(vehiculos[0]?.id ?? '')
+  const [vehiculoId, setVehiculoId] = useState(preVehiculo)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 

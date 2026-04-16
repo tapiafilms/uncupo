@@ -70,7 +70,7 @@ export default async function UsuarioPage({ params }: PageProps) {
 
   const ratings = (calificaciones ?? []) as unknown as (DbCalificacion & { de_user: { nombre: string } })[]
   const autos   = (vehiculos ?? []) as DbVehiculo[]
-  const sector  = (ultimoViaje as any)?.origen ?? null
+  const sector  = user.sector ?? (ultimoViaje as any)?.origen ?? null
 
   const dist = [5,4,3,2,1].map(s => ({
     stars: s,

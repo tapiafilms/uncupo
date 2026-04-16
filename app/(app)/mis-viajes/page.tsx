@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { TripCard } from '@/components/trips/TripCard'
 import { CancelTripButton } from '@/components/trips/CancelTripButton'
 import { ShareTripButton } from '@/components/trips/ShareTripButton'
+import { RepeatTripButton } from '@/components/trips/RepeatTripButton'
 import { HistorialAccordion } from './HistorialAccordion'
 import { AppHeader } from '@/components/layout/AppHeader'
 import type { ViajeConChofer } from '@/lib/types'
@@ -90,6 +91,7 @@ export default async function MisViajesPage() {
                 <TripCard viaje={v} />
                 <div className="px-1 pt-2 flex items-center gap-2">
                   <ShareTripButton viaje={v} />
+                  <RepeatTripButton viaje={v} />
                   {!['en_camino', 'en_destino'].includes(v.estado) && (
                     <CancelTripButton viajeId={v.id} />
                   )}

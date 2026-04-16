@@ -9,7 +9,7 @@ import { MessageCircle } from 'lucide-react'
 import Link from 'next/link'
 
 const ESTADO_PASAJERO_LABELS: Record<PassengerState, string> = {
-  reservado:       '✅ Reservado',
+  reservado:       '✅ Reservaste',
   en_camino:       '🚶 En camino al punto',
   en_el_punto:     '📍 En el punto',
   en_viaje:        '🚗 En viaje',

@@ -103,6 +103,22 @@ export default async function ViajeDetailPage({ params, searchParams }: PageProp
         </div>
       )}
 
+      {/* Reservation status — inline, only when already reserved */}
+      {!isDriver && yaReservado && (
+        <div className="mb-4">
+          <ReserveButton
+            viajeId={trip.id}
+            pasajeroId={user.id}
+            cuposDisponibles={trip.cupos_disponibles}
+            precio={trip.precio_cupo}
+            estado={trip.estado}
+            yaReservado={yaReservado}
+            reservaId={miReserva?.id}
+            estadoPasajero={miReserva?.estado_pasajero}
+          />
+        </div>
+      )}
+
       {/* Route card */}
       <div className="card p-5 mb-4">
         <div className="flex items-start gap-4">
@@ -256,8 +272,8 @@ export default async function ViajeDetailPage({ params, searchParams }: PageProp
         </div>
       )}
 
-      {/* Reserve button (passenger only) */}
-      {!isDriver && (
+      {/* Reserve button — floating, only when not yet reserved */}
+      {!isDriver && !yaReservado && (
         <div className="fixed bottom-20 left-0 right-0 px-4 pb-2 max-w-md mx-auto">
           <ReserveButton
             viajeId={trip.id}

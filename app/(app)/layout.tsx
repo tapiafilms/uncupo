@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { BottomNav } from '@/components/layout/BottomNav'
 import { PageTransition } from '@/components/layout/PageTransition'
 import { PushNavigationListener } from '@/components/notifications/PushNavigationListener'
+import { PushAutoSubscribe } from '@/components/notifications/PushAutoSubscribe'
 
 export default async function AppLayout({
   children,
@@ -19,6 +20,7 @@ export default async function AppLayout({
   return (
     <div className="relative min-h-dvh bg-surface-base">
       <PushNavigationListener />
+      <PushAutoSubscribe userId={user.id} />
       <main>
         <PageTransition>
           {children}

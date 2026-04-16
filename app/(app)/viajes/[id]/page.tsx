@@ -65,6 +65,21 @@ export default async function ViajeDetailPage({ params, searchParams }: PageProp
     })
   }
 
+  // Fetch co-passengers for passenger view
+  let coPasajeros: Array<{ id: string; nombre: string; foto_url: string | null }> = []
+  if (!isDriver && yaReservado && trip.reservas?.length > 0) {
+    const ids = trip.reservas.map((r) => r.pasajero_id)
+    const { data: profiles } = await supabase
+      .from('users')
+      .select('id, nombre, foto_url')
+      .in('id', ids)
+    coPasajeros = (profiles ?? []).map((p) => ({
+      id: p.id,
+      nombre: p.nombre,
+      foto_url: p.foto_url ?? null,
+    }))
+  }
+
   const ocupados = trip.cupos_total - trip.cupos_disponibles
 
   return (
@@ -217,6 +232,28 @@ export default async function ViajeDetailPage({ params, searchParams }: PageProp
       {/* Passenger list (driver only) */}
       {isDriver && pasajeros.length > 0 && (
         <PassengerList pasajeros={pasajeros} viajeId={trip.id} />
+      )}
+
+      {/* Co-passengers (passenger view, only when reserved) */}
+      {!isDriver && yaReservado && coPasajeros.length > 0 && (
+        <div className="card p-4 mb-4">
+          <p className="text-xs font-semibold text-ink-muted uppercase tracking-wider mb-3">
+            Viajando juntos ({coPasajeros.length})
+          </p>
+          <div className="flex flex-col gap-3">
+            {coPasajeros.map((p) => (
+              <div key={p.id} className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-full bg-brand/20 flex items-center justify-center shrink-0 overflow-hidden">
+                  {p.foto_url
+                    ? <img src={p.foto_url} alt={p.nombre} className="w-full h-full object-cover" />
+                    : <span className="text-sm font-bold text-brand">{p.nombre[0]?.toUpperCase()}</span>
+                  }
+                </div>
+                <span className="text-sm text-ink-primary font-medium">{p.nombre}</span>
+              </div>
+            ))}
+          </div>
+        </div>
       )}
 
       {/* Reserve button (passenger only) */}

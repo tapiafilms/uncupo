@@ -10,6 +10,7 @@ import { ReserveButton } from './ReserveButton'
 import { TripStatusBadge } from './TripStatusBadge'
 import { PassengerList } from './PassengerList'
 import { TripMap } from './TripMap'
+import { EditTripButton } from './EditTripButton'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -249,6 +250,21 @@ export default async function ViajeDetailPage({ params, searchParams }: PageProp
             />
           )}
         </div>
+      )}
+
+      {/* Edit trip button — driver only, editable states */}
+      {isDriver && ['publicado', 'confirmado'].includes(trip.estado) && (
+        <EditTripButton
+          viajeId={trip.id}
+          inicial={{
+            fecha: new Date(trip.fecha_hora).toLocaleDateString('en-CA', { timeZone: 'America/Santiago' }),
+            hora:  new Date(trip.fecha_hora).toLocaleTimeString('es-CL', { timeZone: 'America/Santiago', hour: '2-digit', minute: '2-digit', hour12: false }),
+            precio: trip.precio_cupo,
+            cupos:  trip.cupos_total,
+            notas:  trip.notas ?? '',
+            reservados: trip.cupos_total - trip.cupos_disponibles,
+          }}
+        />
       )}
 
       {/* Confirm trip CTA — driver with pending passengers */}

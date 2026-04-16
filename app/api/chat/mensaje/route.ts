@@ -56,18 +56,26 @@ export async function POST(req: Request) {
   if (msgError) return NextResponse.json({ error: 'No se pudo enviar' }, { status: 500 })
 
   // 4. Determinar destinatario
-  const destinatarioId   = esChofer ? reserva.pasajero_id : viaje.chofer_id
-  const nombreRemitente  = esChofer ? chofer.nombre : pasajero.nombre
-  const ruta             = `${viaje.origen} → ${viaje.destino}`
+  const choferIdFinal    = viaje?.chofer_id ?? chofer?.id
+  const destinatarioId   = esChofer ? reserva.pasajero_id : choferIdFinal
+  const nombreRemitente  = esChofer ? chofer?.nombre : pasajero?.nombre
+
+  console.log('[chat/mensaje] remitente:', user.id, 'esChofer:', esChofer, 'destinatario:', destinatarioId)
+
+  if (!destinatarioId) {
+    console.error('[chat/mensaje] destinatarioId es null — viaje:', JSON.stringify(viaje))
+    return NextResponse.json({ ok: true, mensaje })
+  }
 
   // 5. Notificación in-app
-  await supabase.from('notificaciones').insert({
+  const { error: notifError } = await supabase.from('notificaciones').insert({
     user_id: destinatarioId,
-    tipo: 'nuevo_mensaje',
+    tipo: 'nueva_alerta',
     titulo: `💬 ${nombreRemitente}`,
     mensaje: texto.trim().length > 60 ? texto.trim().slice(0, 57) + '…' : texto.trim(),
     leido: false,
   })
+  if (notifError) console.error('[chat/mensaje] notif insert error:', notifError.message)
 
   // 6. Push notification
   if (process.env.VAPID_PRIVATE_KEY) {

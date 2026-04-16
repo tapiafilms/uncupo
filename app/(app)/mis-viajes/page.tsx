@@ -2,6 +2,9 @@ export const dynamic = 'force-dynamic'
 
 import { createClient } from '@/lib/supabase/server'
 import { TripCard } from '@/components/trips/TripCard'
+import { CancelTripButton } from '@/components/trips/CancelTripButton'
+import { ShareTripButton } from '@/components/trips/ShareTripButton'
+import { HistorialAccordion } from './HistorialAccordion'
 import { AppHeader } from '@/components/layout/AppHeader'
 import type { ViajeConChofer } from '@/lib/types'
 
@@ -28,10 +31,19 @@ export default async function MisViajesPage() {
   const tripsChofer = (viajesChofer ?? []) as unknown as ViajeConChofer[]
   const tripsPasajero = (reservas ?? []).map((r: any) => r.viaje) as ViajeConChofer[]
 
+  // Umbral: últimas 24 horas
+  const hace24h = new Date(Date.now() - 24 * 60 * 60 * 1000)
+
   const activosChofer   = tripsChofer.filter(v => !['finalizado', 'cancelado'].includes(v.estado))
-  const pasadosChofer   = tripsChofer.filter(v =>  ['finalizado', 'cancelado'].includes(v.estado))
+  const pasadosChofer   = tripsChofer.filter(v =>
+    ['finalizado', 'cancelado'].includes(v.estado) &&
+    new Date(v.fecha_hora) >= hace24h
+  )
   const activosPasajero = tripsPasajero.filter(v => !['finalizado', 'cancelado'].includes(v?.estado))
-  const pasadosPasajero = tripsPasajero.filter(v =>  ['finalizado', 'cancelado'].includes(v?.estado))
+  const pasadosPasajero = tripsPasajero.filter(v =>
+    ['finalizado', 'cancelado'].includes(v?.estado) &&
+    new Date(v.fecha_hora) >= hace24h
+  )
 
   // Check for in-progress trips to show shortcut banners
   const viajeEnCurso = activosChofer.find(v => ['en_camino', 'en_destino', 'confirmado'].includes(v.estado))
@@ -73,7 +85,17 @@ export default async function MisViajesPage() {
       <Section title="🚗 Como Chofer — Activos">
         {activosChofer.length === 0
           ? <Empty text="No tienes viajes activos publicados" cta={{ href: '/publicar', label: '+ Publicar viaje' }} />
-          : activosChofer.map(v => <TripCard key={v.id} viaje={v} />)
+          : activosChofer.map(v => (
+              <div key={v.id}>
+                <TripCard viaje={v} />
+                <div className="px-1 flex items-center gap-3">
+                  <ShareTripButton viaje={v} />
+                  {!['en_camino', 'en_destino'].includes(v.estado) && (
+                    <CancelTripButton viajeId={v.id} />
+                  )}
+                </div>
+              </div>
+            ))
         }
       </Section>
 
@@ -85,14 +107,10 @@ export default async function MisViajesPage() {
         }
       </Section>
 
-      {/* Historial */}
-      {(pasadosChofer.length > 0 || pasadosPasajero.length > 0) && (
-        <Section title="📁 Historial">
-          {[...pasadosChofer, ...pasadosPasajero].filter(Boolean).map(v => (
-            <TripCard key={v.id} viaje={v} compact />
-          ))}
-        </Section>
-      )}
+      {/* Historial — acordeón, solo últimas 24h */}
+      <HistorialAccordion
+        viajes={[...pasadosChofer, ...pasadosPasajero].filter(Boolean) as ViajeConChofer[]}
+      />
     </div>
   )
 }

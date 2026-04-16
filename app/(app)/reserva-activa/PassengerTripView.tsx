@@ -17,15 +17,11 @@ const PASSENGER_STEPS: { key: PassengerState; label: string; emoji: string; desc
   { key: 'reservado',   label: 'Reservado',     emoji: '📋', desc: 'Esperando que el chofer confirme' },
   { key: 'en_camino',   label: 'En camino',     emoji: '🚶', desc: 'Vas hacia el punto de encuentro' },
   { key: 'en_el_punto', label: 'En el punto',   emoji: '📍', desc: 'Estás en el punto de encuentro' },
-  { key: 'en_viaje',    label: 'En viaje',      emoji: '🚗', desc: 'Viajando hacia el destino' },
-  { key: 'llego',       label: 'Llegaste',      emoji: '🏁', desc: 'Llegaste al destino' },
 ]
 
 const NEXT_PASSENGER_STATE: Partial<Record<PassengerState, { state: PassengerState; label: string }>> = {
-  reservado:   { state: 'en_camino',   label: '🚶 Salí hacia el punto' },
-  en_camino:   { state: 'en_el_punto', label: '📍 Llegué al punto de encuentro' },
-  en_el_punto: { state: 'en_viaje',    label: '🚗 Subí al auto' },
-  en_viaje:    { state: 'llego',       label: '🏁 Llegué al destino' },
+  reservado: { state: 'en_camino',   label: '🚶 Salí hacia el punto' },
+  en_camino: { state: 'en_el_punto', label: '📍 Llegué al punto de encuentro' },
 }
 
 const TRIP_STATE_MESSAGES: Partial<Record<TripState, { color: string; msg: string }>> = {
@@ -118,7 +114,17 @@ export function PassengerTripView({ reservaId, reservaInicial, pasajeroId }: Pro
           (estadoViaje as string) === 'confirmado' ? 'border-success' :
           (estadoViaje as string) === 'cancelado'  ? 'border-danger'  : 'border-brand'
         )}>
-          <p className={cn('text-sm font-medium', tripMsg.color)}>{tripMsg.msg}</p>
+          <div className="flex items-center justify-between gap-2">
+            <p className={cn('text-sm font-medium', tripMsg.color)}>{tripMsg.msg}</p>
+            {estadoViaje === 'publicado' && (
+              <button
+                onClick={() => window.location.reload()}
+                className="shrink-0 text-xs font-semibold px-2.5 py-1 rounded-full bg-brand/10 text-brand hover:bg-brand/20 transition-all active:scale-95"
+              >
+                Actualizar
+              </button>
+            )}
+          </div>
         </div>
       )}
 
@@ -151,7 +157,7 @@ export function PassengerTripView({ reservaId, reservaInicial, pasajeroId }: Pro
                   )}>
                     {step.label}
                   </p>
-                  {current && (
+                  {current && !(step.key === 'reservado' && estadoViaje !== 'publicado') && (
                     <p className="text-xs text-ink-secondary mt-0.5">{step.desc}</p>
                   )}
                 </div>

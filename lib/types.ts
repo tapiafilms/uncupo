@@ -26,6 +26,7 @@ export type NotificationType =
   | 'pago_confirmado'
   | 'nueva_alerta'
   | 'calificacion_recibida'
+  | 'nuevo_mensaje'
 
 // ─── Database Row Types ──────────────────────────────────────────────────────
 

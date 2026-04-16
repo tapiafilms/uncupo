@@ -62,6 +62,7 @@ export function NotificationCenter({ userId }: { userId: string }) {
     pago_confirmado:     '💰',
     nueva_alerta:        '🔔',
     calificacion_recibida: '⭐',
+    nuevo_mensaje:       '💬',
   }
 
   return (

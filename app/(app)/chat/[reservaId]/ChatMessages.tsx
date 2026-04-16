@@ -33,6 +33,23 @@ export function ChatMessages({ reservaId, userId, mensajesIniciales, viajeEstado
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [mensajes])
 
+  // Sonido de notificación al recibir mensaje del otro
+  function playPing() {
+    try {
+      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)()
+      const osc = ctx.createOscillator()
+      const gain = ctx.createGain()
+      osc.connect(gain)
+      gain.connect(ctx.destination)
+      osc.frequency.value = 880
+      osc.type = 'sine'
+      gain.gain.setValueAtTime(0.3, ctx.currentTime)
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3)
+      osc.start(ctx.currentTime)
+      osc.stop(ctx.currentTime + 0.3)
+    } catch { /* silencia errores en contextos sin audio */ }
+  }
+
   // Realtime
   useEffect(() => {
     const channel = supabase
@@ -49,6 +66,7 @@ export function ChatMessages({ reservaId, userId, mensajesIniciales, viajeEstado
           const nuevo = payload.new as Mensaje
           setMensajes((prev) => {
             if (prev.find((m) => m.id === nuevo.id)) return prev
+            if (nuevo.de_user_id !== userId) playPing()
             return [...prev, nuevo]
           })
         }
@@ -76,19 +94,18 @@ export function ChatMessages({ reservaId, userId, mensajesIniciales, viajeEstado
     }
     setMensajes(prev => [...prev, tempMsg])
 
-    const { data: inserted, error } = await supabase
-      .from('mensajes')
-      .insert({ reserva_id: reservaId, de_user_id: userId, texto: t })
-      .select('id, de_user_id, texto, creado_en')
-      .single()
+    const res = await fetch('/api/chat/mensaje', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ reservaId, texto: t }),
+    })
 
     setSending(false)
-    if (error) {
-      // Revertir si falló
+    if (!res.ok) {
       setTexto(t)
       setMensajes(prev => prev.filter(m => m.id !== tempId))
     } else {
-      // Reemplazar temp con el mensaje real (Realtime lo deduplicará por id)
+      const { mensaje: inserted } = await res.json()
       setMensajes(prev => prev.map(m => m.id === tempId ? inserted : m))
       inputRef.current?.focus()
     }

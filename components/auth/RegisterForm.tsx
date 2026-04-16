@@ -7,7 +7,7 @@ import { Mail, Lock, User, MapPin, Phone, ArrowRight, Eye, EyeOff, CheckCircle, 
 import Link from 'next/link'
 import { SECTORES } from '@/lib/types'
 
-type Step = 'datos' | 'rol' | 'enviado'
+type Step = 'datos' | 'rol' | 'enviado' | 'lleno'
 
 export function RegisterForm() {
   const supabase = createClient()
@@ -51,6 +51,19 @@ export function RegisterForm() {
     setError(null)
     setLoading(true)
 
+    // Verificar límite de usuarios antes de crear la cuenta
+    try {
+      const res  = await fetch('/api/auth/check-limit')
+      const data = await res.json()
+      if (!data.permitido) {
+        setLoading(false)
+        setStep('lleno')
+        return
+      }
+    } catch {
+      // Si falla el check, dejamos pasar (mejor experiencia que bloquear por error de red)
+    }
+
     const { data: signUpData, error } = await supabase.auth.signUp({
       email: email.trim().toLowerCase(),
       password,
@@ -89,6 +102,25 @@ export function RegisterForm() {
     // Sin sesión → requiere confirmar email
     setLoading(false)
     setStep('enviado')
+  }
+
+  // ── Pantalla: límite alcanzado ────────────────────────────
+  if (step === 'lleno') {
+    return (
+      <div className="w-full max-w-sm text-center animate-slide-up space-y-4">
+        <div className="w-16 h-16 rounded-full bg-warning/20 flex items-center justify-center mx-auto">
+          <span className="text-3xl">🚦</span>
+        </div>
+        <h2 className="text-lg font-bold text-ink-primary">Estamos al límite por ahora</h2>
+        <p className="text-ink-secondary text-sm">
+          UNcupo está en fase beta y hemos alcanzado el máximo de usuarios por el momento.
+        </p>
+        <p className="text-ink-muted text-xs">
+          Estamos trabajando para abrir más cupos pronto. Si ya tienes cuenta,{' '}
+          <Link href="/login" className="text-brand font-semibold">ingresa aquí</Link>.
+        </p>
+      </div>
+    )
   }
 
   // ── Pantalla: email enviado ────────────────────────────────

@@ -5,6 +5,7 @@ import { PageTransition } from '@/components/layout/PageTransition'
 import { PushNavigationListener } from '@/components/notifications/PushNavigationListener'
 import { PushAutoSubscribe } from '@/components/notifications/PushAutoSubscribe'
 import { GlobalNotificationListener } from '@/components/notifications/GlobalNotificationListener'
+import { InstallPrompt } from '@/components/pwa/InstallPrompt'
 
 export default async function AppLayout({
   children,
@@ -23,6 +24,7 @@ export default async function AppLayout({
       <PushNavigationListener />
       <PushAutoSubscribe userId={user.id} />
       <GlobalNotificationListener userId={user.id} />
+      <InstallPrompt />
       <main>
         <PageTransition>
           {children}

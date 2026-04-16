@@ -281,9 +281,7 @@ export default async function ViajeDetailPage({ params, searchParams }: PageProp
             cuposDisponibles={trip.cupos_disponibles}
             precio={trip.precio_cupo}
             estado={trip.estado}
-            yaReservado={yaReservado}
-            reservaId={miReserva?.id}
-            estadoPasajero={miReserva?.estado_pasajero}
+            yaReservado={false}
           />
         </div>
       )}

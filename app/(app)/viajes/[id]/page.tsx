@@ -65,6 +65,27 @@ export default async function ViajeDetailPage({ params, searchParams }: PageProp
     })
   }
 
+  // Check for scheduling conflict (±2h) — only relevant if not already reserved in this trip
+  let viajeConflicto = false
+  if (!isDriver && !yaReservado) {
+    const tripDate = new Date(trip.fecha_hora)
+    const desde = new Date(tripDate.getTime() - 2 * 60 * 60 * 1000).toISOString()
+    const hasta = new Date(tripDate.getTime() + 2 * 60 * 60 * 1000).toISOString()
+
+    const { data: reservasActivas } = await supabase
+      .from('reservas')
+      .select('id, viaje:viajes!inner(id, fecha_hora, estado)')
+      .eq('pasajero_id', user.id)
+      .not('estado_pasajero', 'eq', 'pago_confirmado')
+
+    viajeConflicto = (reservasActivas ?? []).some((r: any) => {
+      const fh = r.viaje?.fecha_hora
+      const estado = r.viaje?.estado
+      if (!fh || ['finalizado', 'cancelado'].includes(estado)) return false
+      return fh >= desde && fh <= hasta
+    })
+  }
+
   // Fetch co-passengers for passenger view
   let coPasajeros: Array<{ id: string; nombre: string; foto_url: string | null }> = []
   if (!isDriver && yaReservado && trip.reservas?.length > 0) {
@@ -275,14 +296,21 @@ export default async function ViajeDetailPage({ params, searchParams }: PageProp
       {/* Reserve button — floating, only when not yet reserved */}
       {!isDriver && !yaReservado && (
         <div className="fixed bottom-20 left-0 right-0 px-4 pb-2 max-w-md mx-auto">
-          <ReserveButton
-            viajeId={trip.id}
-            pasajeroId={user.id}
-            cuposDisponibles={trip.cupos_disponibles}
-            precio={trip.precio_cupo}
-            estado={trip.estado}
-            yaReservado={false}
-          />
+          {viajeConflicto ? (
+            <div className="bg-warning/10 border border-warning/30 rounded-2xl p-4 text-center">
+              <p className="text-warning font-semibold text-sm">⚠️ Ya tienes un viaje en este horario</p>
+              <p className="text-warning/70 text-xs mt-1">Tienes una reserva activa dentro de las ±2 horas de este viaje</p>
+            </div>
+          ) : (
+            <ReserveButton
+              viajeId={trip.id}
+              pasajeroId={user.id}
+              cuposDisponibles={trip.cupos_disponibles}
+              precio={trip.precio_cupo}
+              estado={trip.estado}
+              yaReservado={false}
+            />
+          )}
         </div>
       )}
 

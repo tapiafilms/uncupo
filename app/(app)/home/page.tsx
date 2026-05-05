@@ -6,6 +6,7 @@ import { TripCard } from '@/components/trips/TripCard'
 import { TripFilters } from '@/components/trips/TripFilters'
 import { NotificationCenter } from '@/components/notifications/NotificationCenter'
 import { AppHeader } from '@/components/layout/AppHeader'
+import { VideoHero } from '@/components/layout/VideoHero'
 import { RefreshButton } from '@/components/ui/RefreshButton'
 import type { ViajeConChofer } from '@/lib/types'
 import { PUNTOS_VINA } from '@/lib/types'
@@ -69,44 +70,27 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   return (
     <div>
       {/* ── Hero con video de fondo ── */}
-      <div className="relative px-4 pt-4 pb-6 overflow-hidden">
-        {/* Video de fondo */}
-        <video
-          autoPlay
-          muted
-          loop
-          playsInline
-          className="absolute inset-0 w-full h-full object-cover"
-        >
-          <source src="/uncupo.mp4" type="video/mp4" />
-        </video>
+      <VideoHero>
+        <AppHeader right={<NotificationCenter userId={user!.id} />} />
 
-        {/* Overlay oscuro */}
-        <div className="absolute inset-0 bg-surface-base/60" />
-        <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-b from-transparent to-surface-base" />
-
-        <div className="relative z-10">
-          <AppHeader right={<NotificationCenter userId={user!.id} />} />
-
-          <div className="flex items-center gap-3 mb-5 pt-8">
-            <div className="w-10 h-10 rounded-full overflow-hidden shrink-0 bg-brand/20 flex items-center justify-center ring-2 ring-white/20">
-              {fotoUrl
-                ? <img src={fotoUrl} alt={nombre} className="w-full h-full object-cover" />
-                : <span className="text-sm font-bold text-brand">{nombre[0]?.toUpperCase()}</span>
-              }
-            </div>
-            <div>
-              <p className="text-xs text-white/60 leading-none mb-0.5">{saludo}</p>
-              <p className="text-base font-bold text-white leading-none">{nombre} 👋</p>
-            </div>
+        <div className="flex items-center gap-3 mb-5 pt-8">
+          <div className="w-10 h-10 rounded-full overflow-hidden shrink-0 bg-brand/20 flex items-center justify-center ring-2 ring-white/20">
+            {fotoUrl
+              ? <img src={fotoUrl} alt={nombre} className="w-full h-full object-cover" />
+              : <span className="text-sm font-bold text-brand">{nombre[0]?.toUpperCase()}</span>
+            }
           </div>
-
-          {/* Filtro de dirección */}
-          <Suspense>
-            <TripFilters />
-          </Suspense>
+          <div>
+            <p className="text-xs text-white/60 leading-none mb-0.5">{saludo}</p>
+            <p className="text-base font-bold text-white leading-none">{nombre} 👋</p>
+          </div>
         </div>
-      </div>
+
+        {/* Filtro de dirección */}
+        <Suspense>
+          <TripFilters />
+        </Suspense>
+      </VideoHero>
 
       {/* ── Contenido ── */}
       <div className="max-w-md mx-auto px-4 pb-24 pt-3">

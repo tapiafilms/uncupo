@@ -68,11 +68,20 @@ export default async function HomePage({ searchParams }: HomePageProps) {
 
   return (
     <div>
-      {/* ── Hero con imagen de fondo ── */}
-      <div
-        className="relative bg-cover bg-center px-4 pt-4 pb-6"
-        style={{ backgroundImage: "url('/bg-header.png')" }}
-      >
+      {/* ── Hero con video de fondo ── */}
+      <div className="relative px-4 pt-4 pb-6 overflow-hidden">
+        {/* Video de fondo */}
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover"
+        >
+          <source src="/uncupo.mp4" type="video/mp4" />
+        </video>
+
+        {/* Overlay oscuro */}
         <div className="absolute inset-0 bg-surface-base/60" />
         <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-b from-transparent to-surface-base" />
 
